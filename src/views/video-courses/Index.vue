@@ -173,8 +173,8 @@ export default {
       overflow: hidden;
     }
     .img {
-      border: 1px solid #eee;
-      border-radius: 4px;
+      border: $border;
+      @include rounded();
       position: relative;
       overflow: hidden;
       margin-bottom: 5px;

@@ -42,13 +42,9 @@ export default {
         // player ready
         const video = document.getElementsByTagName("video")[0]
         video.style.height = "auto"
-        console.log(video.clientWidth)
-        console.log(video.clientHeight)
         const player = document.querySelector("#player")
         player.style.width = video.clientWidth + "px"
         player.style.height = video.clientHeight + "px"
-        console.log(player.clientWidth)
-        console.log(player.clientHeight)
       })
     }
   },
@@ -68,7 +64,7 @@ export default {
     width: 100%;
   }
   .right {
-    border-left: 1px solid #eaeaea;
+    border-left: $border;
     padding: 20px;
     min-width: 250px;
     overflow: scroll;

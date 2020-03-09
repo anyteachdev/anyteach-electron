@@ -12,7 +12,7 @@ Vue.prototype.$api = api
 Vue.prototype.$bgd = url => {
   return `
     background-image: url('${url}'); 
-    background-color: #eee;
+    background-color: var(--color-bgd);
     background-position: center center;
     `
 }

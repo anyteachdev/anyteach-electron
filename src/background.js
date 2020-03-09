@@ -1,12 +1,23 @@
 "use strict"
 
-import { app, protocol, BrowserWindow, dialog } from "electron"
+import {
+  app,
+  protocol,
+  BrowserWindow,
+  dialog,
+  nativeTheme,
+  updateMyAppTheme
+} from "electron"
 import {
   createProtocol,
   installVueDevtools
 } from "vue-cli-plugin-electron-builder/lib"
 const isDevelopment = process.env.NODE_ENV !== "production"
 
+nativeTheme.on("updated", function theThemeHasChanged() {
+  console.log(nativeTheme.shouldUseDarkColors)
+  // updateMyAppTheme(nativeTheme.shouldUseDarkColors)
+})
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let win

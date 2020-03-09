@@ -39,7 +39,7 @@ export default {
     bgd(url) {
       return `
       background-image: url('${url}'); 
-      background-color: #eee;
+      background-color: $color-bgd;
       background-size: cover;
       background-position: center center;
       `
@@ -58,7 +58,6 @@ export default {
       this.$confirm("确认退出？", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
-        type: "warning"
       }).then(() => {
         this.$store.dispatch("logout")
       }).catch(() => { })
@@ -76,7 +75,7 @@ export default {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid #eaeaea;
+  border-bottom: $border;
   padding: 0 25px;
   -webkit-app-region: drag;
   -webkit-user-select: none;
@@ -88,7 +87,6 @@ export default {
     justify-content: space-between;
     width: 70px;
     .item {
-      // background: blue;
       cursor: pointer;
       color: $color-primary;
       display: inline-block;
@@ -127,6 +125,7 @@ export default {
   .user {
     display: flex;
     align-items: center;
+    color: $color-plain;
 
     .img {
       $size: 35px;

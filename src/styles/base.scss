@@ -1,7 +1,18 @@
-$topNavHeight: 50px;
-// $color-primary: #018cff;
-$color-primary: #ed254e;
+// Basic variables
+$color-plain: var(--color-plain);
+$color-primary: var(--color-primary);
+$color-bgd: var(--color-bgd);
+$color-border: var(--color-border);
+$border: 1px solid $color-border;
 
+// Specific variables
+$topNavHeight: 50px;
+
+// Mixins
 @mixin height($property) {
   height: calc(#{$property} - #{$topNavHeight});
+}
+
+@mixin rounded() {
+  border-radius: 4px;
 }

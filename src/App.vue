@@ -37,6 +37,7 @@ export default {
       try {
         await this.$store.dispatch("user")
       } catch (error) {
+        this.getProfile()
         throw new Error(error)
       }
     },
@@ -95,23 +96,9 @@ export default {
   }
 }
 </script>
-<style>
-@import "//at.alicdn.com/t/font_258157_aigzetzkq1e.css";
-</style>
 <style lang="scss">
-html,
-body {
-  width: 100%;
-  height: 100%;
-  margin: 0;
-  padding: 0;
-  font-family: Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-* {
-  box-sizing: border-box;
-}
+@import "./styles/app.scss";
+
 #app {
   height: 100%;
 }
@@ -121,8 +108,5 @@ body {
   top: $topNavHeight;
   width: 100%;
   @include height(100vh);
-}
-.no-padding {
-  padding: 0;
 }
 </style>

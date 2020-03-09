@@ -57,7 +57,7 @@ export default {
 #sidenav {
   @include height(100vh);
   width: 100%;
-  border-right: 1px solid #eaeaea;
+  border-right: $border;
 
   .route {
     display: block;
