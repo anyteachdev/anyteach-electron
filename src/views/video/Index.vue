@@ -62,8 +62,6 @@ export default {
 @import "https://g.alicdn.com/de/prismplayer/2.8.2/skins/default/aliplayer-min.css";
 </style>
 <style lang="scss" scoped>
-@import "../../styles/base.scss";
-
 #video {
   display: flex;
   .left {

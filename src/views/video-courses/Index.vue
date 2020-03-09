@@ -187,7 +187,8 @@ export default {
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(1, 131, 255, 0.8);
+      // background: rgba(1, 131, 255, 0.8);
+      background: rgba(237, 37, 78, 0.8);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -199,7 +200,7 @@ export default {
         background-size: 110% !important;
       }
       h2 {
-        color: #018cff;
+        color: $color-primary;
       }
       .overlay {
         opacity: 1;

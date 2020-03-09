@@ -1,20 +1,12 @@
 <template>
   <div class="header" v-if="$route.path !== '/login'">
     <div class="buttons">
-      <el-button
-        :disabled="!canBack"
-        size="mini"
-        circle
-        icon="el-icon-arrow-left"
-        @click="$router.go(-1)"
-      ></el-button>
-      <el-button
-        :disabled="!canNext"
-        size="mini"
-        circle
-        icon="el-icon-arrow-right"
-        @click="$router.go(1)"
-      ></el-button>
+      <div class="item" :class="{ disabled : !canBack }" @click="back">
+        <i class="el-icon-arrow-left" />
+      </div>
+      <div class="item" :class="{ disabled : !canNext }" @click="next">
+        <i class="el-icon-arrow-right" />
+      </div>
     </div>
     <el-dropdown>
       <span class="el-dropdown-link">
@@ -52,6 +44,16 @@ export default {
       background-position: center center;
       `
     },
+    back() {
+      if (this.canBack) {
+        this.$router.go(-1)
+      }
+    },
+    next() {
+      if (this.canNext) {
+        this.$router.go(1)
+      }
+    },
     logout() {
       this.$confirm("确认退出？", "提示", {
         confirmButtonText: "确定",
@@ -66,19 +68,61 @@ export default {
 </script>
 
 <style scoped lang="scss">
-@import "../styles/base.scss";
 .header {
   height: $topNavHeight;
   position: fixed;
   width: 100%;
-  display: flex;
   top: 0;
+  display: flex;
   align-items: center;
   justify-content: space-between;
   border-bottom: 1px solid #eaeaea;
   padding: 0 25px;
   -webkit-app-region: drag;
   -webkit-user-select: none;
+
+  .buttons {
+    // background: #eee;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 70px;
+    .item {
+      // background: blue;
+      cursor: pointer;
+      color: $color-primary;
+      display: inline-block;
+      $size: 30px;
+      width: $size;
+      height: $size;
+      border-radius: $size;
+      position: relative;
+      transition: all 0.1s;
+      &:hover {
+        background: #f7f7f7;
+      }
+      &:active {
+        i {
+          font-size: 17px;
+        }
+      }
+      i {
+        position: absolute;
+        font-size: 20px;
+        transition: all 0.1s;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+    }
+
+    .disabled {
+      opacity: 0.2;
+      &:hover {
+        background: none;
+      }
+    }
+  }
 
   .user {
     display: flex;

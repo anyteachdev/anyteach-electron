@@ -99,7 +99,6 @@ export default {
 @import "//at.alicdn.com/t/font_258157_aigzetzkq1e.css";
 </style>
 <style lang="scss">
-@import "./styles/base.scss";
 html,
 body {
   width: 100%;

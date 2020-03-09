@@ -18,7 +18,6 @@ export default new Vuex.Store({
       state.user = user
     },
     online(state, online) {
-      console.log(online)
       state.online = online
     },
     jwt(state, jwt) {

@@ -42,7 +42,7 @@ export default {
   }
   h1,
   i {
-    color: #018cff;
+    color: $color-primary;
   }
 }
 </style>

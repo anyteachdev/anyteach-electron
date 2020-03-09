@@ -54,7 +54,6 @@ export default {
 </script>
 
 <style scoped lang="scss">
-@import "../styles/base.scss";
 #sidenav {
   @include height(100vh);
   width: 100%;
@@ -78,7 +77,7 @@ export default {
     }
   }
   .router-link-active {
-    background: #0183ff;
+    background: $color-primary;
     span,
     i {
       color: white;

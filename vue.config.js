@@ -6,5 +6,14 @@ module.exports = {
         productName: "AnyTeach"
       }
     }
+  },
+  css: {
+    loaderOptions: {
+      sass: {
+        prependData: `
+          @import "@/styles/base.scss";
+        `
+      }
+    }
   }
 }

@@ -1,4 +1,7 @@
 $topNavHeight: 50px;
+// $color-primary: #018cff;
+$color-primary: #ed254e;
+
 @mixin height($property) {
   height: calc(#{$property} - #{$topNavHeight});
 }

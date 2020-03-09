@@ -1,7 +1,13 @@
 <template>
-  <div class="home">
-    <div v-if="$store.state.login">
-      <el-button @click="openVideo">打开视频</el-button>
+  <div id="home">
+    <div class="text">
+      <h1>您好，欢迎登陆</h1>
+      <router-link tag="span" to="/videos">
+        <el-link type="primary">
+          看看视频课
+          <i class="el-icon-right" />
+        </el-link>
+      </router-link>
     </div>
   </div>
 </template>
@@ -10,9 +16,18 @@
 export default {
   name: "Home",
   methods: {
-    openVideo() {
-      this.$router.push("/video/watch/" + "635906f563ec401ab470fca80a1c88bc")
-    }
   }
 }
 </script>
+
+<style lang="scss" scoped>
+#home {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  @include height(80vh);
+  .text {
+  }
+}
+</style>
