@@ -1,18 +1,18 @@
 <template>
   <div class="home">
-    <img alt="Vue logo" src="../assets/logo.png" />
-    <HelloWorld msg="Welcome to Your Vue.js App" />
+    <div v-if="$store.state.login">
+      <el-button @click="openVideo">打开视频</el-button>
+    </div>
   </div>
 </template>
 
 <script>
-// @ is an alias to /src
-import HelloWorld from "@/components/HelloWorld.vue";
-
 export default {
   name: "Home",
-  components: {
-    HelloWorld
+  methods: {
+    openVideo() {
+      this.$router.push("/video/watch/" + "635906f563ec401ab470fca80a1c88bc")
+    }
   }
-};
+}
 </script>

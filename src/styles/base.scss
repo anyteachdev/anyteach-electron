@@ -1,0 +1,4 @@
+$topNavHeight: 50px;
+@mixin height($property) {
+  height: calc(#{$property} - #{$topNavHeight});
+}
