@@ -1,6 +1,6 @@
 "use strict"
 
-import { app, protocol, BrowserWindow } from "electron"
+import { app, protocol, BrowserWindow, dialog } from "electron"
 import {
   createProtocol,
   installVueDevtools
@@ -19,11 +19,15 @@ protocol.registerSchemesAsPrivileged([
 function createWindow() {
   // Create the browser window.
   win = new BrowserWindow({
-    width: 800,
+    width: 1000,
     height: 600,
+    minWidth: 800,
+    minHeight: 600,
     webPreferences: {
       nodeIntegration: true
-    }
+    },
+    title: "AnyTeach",
+    show: false
   })
 
   if (process.env.WEBPACK_DEV_SERVER_URL) {
@@ -36,9 +40,26 @@ function createWindow() {
     win.loadURL("app://./index.html")
   }
 
+  win.once("ready-to-show", () => {
+    win.show()
+  })
+
   win.on("closed", () => {
     win = null
   })
+
+  // win.on("close", function(e) {
+  //   e.preventDefault()
+  //   const choice = dialog.showMessageBox(this, {
+  //     type: "question",
+  //     buttons: ["Yes", "No"],
+  //     title: "Confirm",
+  //     message: "Are you sure you want to quit?"
+  //   })
+  //   if (choice === 0) {
+  //     win.close()
+  //   }
+  // })
 }
 
 // Quit when all windows are closed.
