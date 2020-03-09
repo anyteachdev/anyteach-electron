@@ -11,8 +11,14 @@ module.exports = {
   rules: {
     "no-console": process.env.NODE_ENV === "production" ? "error" : "off",
     "no-debugger": process.env.NODE_ENV === "production" ? "error" : "off",
-    semi: [2, "never"]
+    semi: [2, "never"],
+    quotes: [2, "double"]
   },
+  globals: {
+    Aliplayer: "readonly",
+    AliPlayerComponent: "readonly"
+  },
+  ignorePatterns: ["src/assets/scripts/"],
   overrides: [
     {
       files: [
