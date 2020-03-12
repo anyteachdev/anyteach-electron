@@ -1,7 +1,7 @@
 {
-  "name": "anyteach-live-desktop",
+  "name": "anyteach-electron",
   "author": "陈准 Keith Chen",
-  "description": "AnyTeach 直播课堂",
+  "description": "AnyTeach 的桌面端软件",
   "productName": "AnyTeach",
   "version": "0.1.0",
   "private": true,
@@ -23,6 +23,8 @@
     "axios": "^0.19.2",
     "core-js": "^3.6.4",
     "element-ui": "^2.13.0",
+    "qrious": "^4.0.2",
+    "socket.io-client": "^2.3.0",
     "vue": "^2.6.11",
     "vue-resize-directive": "^1.2.0",
     "vue-router": "^3.1.5",

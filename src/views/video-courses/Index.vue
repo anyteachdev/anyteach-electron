@@ -1,6 +1,13 @@
 <template>
   <div id="video-courses">
-    <div class="courses" ref="wrapper" v-resize.throttle.1000="onResize">
+    <div class="empty" v-if="data.length">
+      <div>
+        <h1>暂无视频课</h1>
+        <p>去手机平台上逛逛吧</p>
+        <QR url="http://wx.anyteach.cn" />
+      </div>
+    </div>
+    <div v-else class="courses" ref="wrapper" v-resize.throttle.1000="onResize">
       <router-link
         tag="div"
         ref="item"
@@ -22,11 +29,15 @@
 
 <script>
 import resize from "vue-resize-directive"
+import QR from "@/components/QR"
 
 export default {
   name: "VideoCourses",
   directives: {
     resize,
+  },
+  components: {
+    QR
   },
   data() {
     return {
@@ -142,6 +153,7 @@ export default {
 </script>
 
 <style scoped lang="scss">
+@import "../../styles/common.scss";
 #video-courses {
   width: 100%;
 }

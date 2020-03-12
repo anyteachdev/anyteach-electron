@@ -1,0 +1,16 @@
+.empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  @include height(80vh);
+  -webkit-user-select: none;
+  h1,
+  p {
+    margin: 0 0 5px 0;
+  }
+  p {
+    font-size: 14px;
+    opacity: 0.6;
+  }
+}
