@@ -7,6 +7,9 @@
       <div class="item" :class="{ disabled : !canNext }" @click="next">
         <i class="el-icon-arrow-right" />
       </div>
+      <div class="item" :class="{ disabled : $route.path === '/' }" @click="home">
+        <i class="anyteachicon anyteach-home" />
+      </div>
     </div>
     <el-dropdown>
       <span class="el-dropdown-link">
@@ -54,6 +57,9 @@ export default {
         this.$router.go(1)
       }
     },
+    home() {
+      this.$router.push("/")
+    },
     logout() {
       this.$confirm("确认退出？", "提示", {
         confirmButtonText: "确定",
@@ -85,7 +91,7 @@ export default {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    width: 70px;
+    width: 100px;
     .item {
       cursor: pointer;
       color: $color-primary;
