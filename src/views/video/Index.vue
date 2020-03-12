@@ -1,6 +1,13 @@
 <template>
   <div id="video">
-    <div class="left">
+    <Wake
+      v-if="player"
+      :interval="1"
+      :trigger="shouldWake"
+      @pause="player.pause()"
+      @play="player.play()"
+    />
+    <div class="top" ref="top">
       <div id="player">
         <div class="overlay-wrapper">
           <div v-for="i in 20" :key="i" class="overlay">
@@ -8,78 +15,122 @@
           </div>
         </div>
       </div>
-      <div class="info">
-        <h1>视频标题</h1>
-        <p v-for="i in 20" :key="i">视频副标题</p>
+      <div class="related">
+        <h3>选择回放</h3>
+        <div class="item" v-for="i in 20" :key="i">
+          <i class="el-icon-video-play" />
+          第 {{ i }} 讲
+        </div>
       </div>
     </div>
-    <div class="right">
-      <p v-for="i in 20" :key="i">right</p>
+    <div class="info">
+      <h1>视频标题</h1>
+      <p v-for="i in 2" :key="i">视频副标题</p>
     </div>
   </div>
 </template>
 
 <script>
+import Wake from "@/components/Wake"
 export default {
   name: "Video",
+  components: {
+    Wake,
+  },
   data() {
-    return {}
+    return {
+      player: null,
+      shouldWake: false
+    }
+  },
+  mounted() {
+    this.initPlayer()
   },
   methods: {
     initPlayer() {
-      /*eslint no-unused-vars: "off"*/
-      const player = new Aliplayer({
+      const w = 1920
+      const h = 1080
+      const height = 350
+      this.$refs.top.style.height = height + "px"
+      this.player = new Aliplayer({
         id: "player",
-        width: "100%",
-        height: "60vh",
+        width: (height * w / h) + "px",
+        height: height + "px",
         autoplay: true,
         source: "http://v.anyteach.cn/sv/2a003583-170ba43057d/2a003583-170ba43057d.mp4",
         // vid: this.$route.params.id,
         playauth: "",
         cover: "",
         encryptType: 1,
-      }, function () {
-        // player ready
-        const video = document.getElementsByTagName("video")[0]
-        video.style.height = "auto"
-        const player = document.querySelector("#player")
-        player.style.width = video.clientWidth + "px"
-        player.style.height = video.clientHeight + "px"
+      }, (player) => {
+        // const video = document.getElementsByTagName("video")[0]
+        // video.style.height = "auto"
+        // const el = document.querySelector("#player")
+        // el.style.width = video.clientWidth + "px"
+        // el.style.height = video.clientHeight + "px"
+
+        player.on("play", () => {
+          this.shouldWake = true
+        })
+
+        player.on("pause", () => {
+          this.shouldWake = false
+        })
+
       })
+
     }
   },
-  mounted() {
-    this.initPlayer()
-  }
 }
 </script>
 
-<style scoped>
-@import "https://g.alicdn.com/de/prismplayer/2.8.2/skins/default/aliplayer-min.css";
-</style>
 <style lang="scss" scoped>
+@import url(https://g.alicdn.com/de/prismplayer/2.8.2/skins/default/aliplayer-min.css);
+
 #video {
-  display: flex;
+  -webkit-user-select: none;
+  max-width: 1000px;
+  margin: 20px auto;
   .left {
     width: 100%;
-  }
-  .right {
-    border-left: $border;
     padding: 20px;
-    min-width: 250px;
+  }
+  .top {
+    display: flex;
+  }
+  .related {
+    padding: 10px 0 10px 10px;
     overflow: scroll;
-    @include height(100vh);
+    flex-grow: 1;
+    background: $color-border;
+    h3 {
+      margin: 0;
+      padding: 10px 20px 10px 10px;
+    }
+    .item {
+      cursor: pointer;
+      font-weight: 500;
+      padding: 10px 20px 10px 10px;
+      font-size: 14px;
+      transition: all 0.2s;
+      $radius: 30px;
+      border-top-left-radius: $radius;
+      border-bottom-left-radius: $radius;
+      &:hover {
+        background: $color-primary;
+        color: white;
+      }
+    }
   }
 }
 
 #player {
   overflow: hidden;
-  -webkit-user-select: none;
 }
 
 .info {
-  overflow: scroll;
-  @include height(40vh);
+  // overflow: scroll;
+  // @include height(40vh);
   padding: 20px;
 
   h1 {

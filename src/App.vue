@@ -1,6 +1,7 @@
 <template>
-  <div id="app" v-loading="$store.state.login === undefined && $store.state.online">
+  <div id="app" v-loading="!state.error && $store.state.login === undefined && $store.state.online">
     <Offline v-if="!$store.state.online" />
+    <Reload :error="state.error" v-else-if="state.error" />
     <TopNav v-if="$route.path !== '/login'" />
     <el-container class="app-container">
       <el-aside v-if="$route.meta.sideNav" width="200px">
@@ -20,16 +21,21 @@
 import TopNav from "@/components/TopNav"
 import SideNav from "@/components/SideNav"
 import Offline from "@/components/Offline"
+import Reload from "@/components/Reload"
 
 export default {
   name: "App",
   components: {
     TopNav,
     SideNav,
-    Offline
+    Offline,
+    Reload
   },
   data() {
     return {
+      state: {
+        error: false
+      }
     }
   },
   methods: {
@@ -37,8 +43,7 @@ export default {
       try {
         await this.$store.dispatch("user")
       } catch (error) {
-        this.getProfile()
-        throw new Error(error)
+        this.state.error = error.message
       }
     },
   },

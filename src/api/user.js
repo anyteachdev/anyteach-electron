@@ -45,8 +45,29 @@ export default {
     try {
       const { data } = await axios(config)
       return data
-    } catch (err) {
-      throw new Error(err)
+      // return await axios(config)
+    } catch (error) {
+      if (error.response) {
+        console.log("response")
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        console.log(error.response.data)
+        console.log(error.response.status)
+        console.log(error.response.headers)
+      } else if (error.request) {
+        // console.log("request")
+        // The request was made but no response was received
+        // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+        // http.ClientRequest in node.js
+        // console.log(error.request)
+      } else {
+        console.log("else")
+        // Something happened in setting up the request that triggered an Error
+        console.log("Error", error.message)
+      }
+      // console.log(error.config)
+      throw error
+      // throw new Error(error.message)
     }
   },
   IS_LOGIN: async () => {
