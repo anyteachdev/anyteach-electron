@@ -70,7 +70,7 @@ export default {
         const { user, jwt } = msg
         this.$store.commit("user", user)
         this.$store.commit("jwt", jwt)
-        this.$store.commit("login")
+        this.$store.dispatch("login")
         this.$message.success("登陆成功")
       } catch (error) {
         throw new Error(error)

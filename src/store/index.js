@@ -1,10 +1,14 @@
 import Vue from "vue"
 import Vuex from "vuex"
 import api from "../api"
+import socket from "./socket"
 
 Vue.use(Vuex)
 
 export default new Vuex.Store({
+  modules: {
+    socket
+  },
   state: {
     user: {},
     jwt: null,
@@ -17,18 +21,18 @@ export default new Vuex.Store({
     user(state, user) {
       state.user = user
     },
-    online(state, online) {
-      state.online = online
-    },
-    jwt(state, jwt) {
-      state.jwt = jwt
-    },
-    login(state, status = true) {
+    login(state, status) {
       state.login = status
       if (!status) {
         state.user = {}
         state.jwt = ""
       }
+    },
+    online(state, online) {
+      state.online = online
+    },
+    jwt(state, jwt) {
+      state.jwt = jwt
     },
     back(state) {
       state.routeIndex--
@@ -53,19 +57,37 @@ export default new Vuex.Store({
       const { code, msg } = await api.user.PROFILE()
       if (code === "1000") {
         context.commit("user", msg)
-        context.commit("login", true)
+        context.dispatch("login", true)
       } else {
-        context.commit("login", false)
+        context.dispatch("login", false)
+      }
+    },
+    login({ state, commit, dispatch }, status = true) {
+      commit("login", status)
+
+      if (!state.socket.client) {
+        dispatch("socket/init")
+        dispatch("socket/log", {
+          url: location.href,
+          name: "desktop_connect",
+          data: navigator.userAgent
+        })
+      }
+      if (status) {
+        dispatch("socket/log", {
+          url: location.href,
+          name: "login",
+          data: state.user.user_id
+        })
       }
     },
     async logout(context) {
       const { code } = await api.auth.LOGOUT()
       if (code === "1000") {
-        context.commit("login", false)
+        context.dispatch("login", false)
         context.commit("user", {})
         context.commit("jwt", null)
       }
     }
-  },
-  modules: {}
+  }
 })

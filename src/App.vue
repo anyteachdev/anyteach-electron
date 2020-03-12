@@ -67,7 +67,7 @@ export default {
             from: this.$route.fullPath,
           }
         }
-        this.$router.push(config).catch(err => err)
+        this.$router.replace(config).catch(err => err)
       }
     }
   },
