@@ -1,6 +1,6 @@
 <template>
   <div id="video-courses">
-    <div class="empty" v-if="data.length">
+    <div class="empty" v-if="!data.length">
       <div>
         <h1>暂无视频课</h1>
         <p>去手机平台上逛逛吧</p>

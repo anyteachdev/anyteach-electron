@@ -2,7 +2,7 @@
   <div id="video">
     <Wake
       v-if="player"
-      :interval="1"
+      :interval="20"
       :trigger="shouldWake"
       @pause="player.pause()"
       @play="player.play()"
@@ -11,7 +11,10 @@
       <div id="player">
         <div class="overlay-wrapper">
           <div v-for="i in 20" :key="i" class="overlay">
-            <p v-for="j in 20" :key="j">{{ $store.state.user.name }} {{ $store.state.user.user_id }}</p>
+            <p
+              v-for="j in 20"
+              :key="j"
+            >{{ $store.state.user.name }} {{ $store.state.user.mobile || $store.state.user.user_id }}</p>
           </div>
         </div>
       </div>
@@ -43,10 +46,74 @@ export default {
       shouldWake: false
     }
   },
+  created() {
+    this.setKeys()
+  },
   mounted() {
     this.initPlayer()
   },
   methods: {
+    setKeys() {
+      document.onkeydown = event => {
+        if (!event) {
+          event = window.event
+        }
+        let code = event.keyCode
+        if (event.charCode && code == 0) {
+          code = event.charCode
+        }
+        switch (code) {
+          case 32:
+            // Space bar
+            this.playPause()
+            break
+          case 37:
+            // Key left.
+            this.seek(false)
+            break
+          case 38:
+            // Key up.
+            this.volume()
+            break
+          case 39:
+            // Key right.
+            this.seek()
+            break
+          case 40:
+            // Key down.
+            this.volume(false)
+            break
+          case 70:
+            // F
+            this.fullscreen()
+            break
+        }
+        // event.preventDefault()
+      }
+    },
+    fullscreen() {
+      if (!this.player) return
+      const isFullScreen = this.player.fullscreenService.getIsFullScreen()
+      isFullScreen ? this.player.fullscreenService.cancelFullScreen() : this.player.fullscreenService.requestFullScreen()
+    },
+    volume(up = true) {
+      if (!this.player) return
+      const current = this.player.getVolume()
+      const update = up ? current + 0.1 : current - 0.1
+      if (update >= 0 && update <= 1) {
+        this.player.setVolume(update)
+      }
+    },
+    seek(forward = true) {
+      if (!this.player) return
+      const current = this.player.getCurrentTime()
+      const update = forward ? current + 5 : current - 5
+      this.player.seek(update)
+    },
+    playPause() {
+      if (!this.player) return
+      this.player.getStatus() === "playing" ? this.player.pause() : this.player.play()
+    },
     initPlayer() {
       const w = 1920
       const h = 1080
@@ -146,7 +213,7 @@ export default {
   width: 100%;
   z-index: 100000;
   background: none;
-  opacity: 0.8;
+  opacity: 0.6;
   overflow: visible;
   pointer-events: none;
   -webkit-user-select: none;
@@ -187,8 +254,8 @@ export default {
 
 .prism-fullscreen {
   .overlay p {
-    font-size: 20px;
-    margin-bottom: 100px;
+    font-size: 16px;
+    margin-bottom: 120px;
   }
 }
 </style>

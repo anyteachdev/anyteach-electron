@@ -50,7 +50,7 @@ export default {
         setTimeout(() => {
           document.querySelector("._confirm").blur()
         }, 0)
-      }, this.interval * 1000)
+      }, this.interval * 1000 * 60)
     }
   },
 }
