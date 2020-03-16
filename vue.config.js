@@ -3,7 +3,16 @@ module.exports = {
     electronBuilder: {
       builderOptions: {
         // options placed here will be merged with default configuration and passed to electron-builder
-        productName: "AnyTeach"
+        productName: "AnyTeach",
+        dmg: {
+          sign: false
+        },
+        mac: {
+          hardenedRuntime: true,
+          gatekeeperAssess: false,
+          entitlements: "build/entitlements.mac.plist",
+          entitlementsInherit: "build/entitlements.mac.plist"
+        }
       }
     }
   },
