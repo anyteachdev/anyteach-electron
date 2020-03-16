@@ -1,11 +1,20 @@
 "use strict"
 
-import { app, protocol, BrowserWindow, dialog, nativeTheme } from "electron"
+import {
+  app,
+  protocol,
+  BrowserWindow,
+  dialog,
+  nativeTheme,
+  Menu
+} from "electron"
 import {
   createProtocol,
   installVueDevtools
 } from "vue-cli-plugin-electron-builder/lib"
 const isDevelopment = process.env.NODE_ENV !== "production"
+const isProduction = process.env.VUE_APP_MODE === "production"
+const isMac = process.platform === "darwin"
 
 nativeTheme.on("updated", function theThemeHasChanged() {
   console.log(nativeTheme.shouldUseDarkColors)
@@ -50,20 +59,76 @@ function createWindow() {
   win.on("closed", () => {
     win = null
   })
-
-  // win.on("close", function(e) {
-  //   e.preventDefault()
-  //   const choice = dialog.showMessageBox(this, {
-  //     type: "question",
-  //     buttons: ["Yes", "No"],
-  //     title: "Confirm",
-  //     message: "Are you sure you want to quit?"
-  //   })
-  //   if (choice === 0) {
-  //     win.close()
-  //   }
-  // })
 }
+
+const template = [
+  // { role: 'appMenu' }
+  ...(isMac
+    ? [
+        {
+          label: app.name,
+          submenu: [
+            { role: "about" },
+            { type: "separator" },
+            { role: "services" },
+            { type: "separator" },
+            { role: "hide" },
+            { role: "hideothers" },
+            { role: "unhide" },
+            { type: "separator" },
+            { role: "quit" }
+          ]
+        }
+      ]
+    : []),
+  // { role: 'fileMenu' }
+  {
+    label: "File",
+    submenu: [isMac ? { role: "close" } : { role: "quit" }]
+  },
+  // { role: 'viewMenu' }
+  {
+    label: "View",
+    submenu: isProduction
+      ? [{ role: "togglefullscreen" }]
+      : [
+          { role: "reload" },
+          { role: "forcereload" },
+          { role: "toggledevtools" },
+          { type: "separator" },
+          { type: "separator" },
+          { role: "togglefullscreen" }
+        ]
+  },
+  // { role: 'windowMenu' }
+  {
+    label: "Window",
+    submenu: [
+      { role: "minimize" },
+      { role: "zoom" },
+      ...(isMac
+        ? [
+            { type: "separator" },
+            { role: "front" },
+            { type: "separator" },
+            { role: "window" }
+          ]
+        : [{ role: "close" }])
+    ]
+  },
+  {
+    role: "help",
+    submenu: [
+      {
+        label: "访问官网",
+        click: async () => {
+          const { shell } = require("electron")
+          await shell.openExternal("https://anyteach.cn")
+        }
+      }
+    ]
+  }
+]
 
 // Quit when all windows are closed.
 app.on("window-all-closed", () => {
@@ -86,6 +151,8 @@ app.on("activate", () => {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on("ready", async () => {
+  const menu = Menu.buildFromTemplate(template)
+  Menu.setApplicationMenu(menu)
   if (isDevelopment && !process.env.IS_TEST) {
     // Install Vue Devtools
     // Devtools extensions are broken in Electron 6.0.0 and greater

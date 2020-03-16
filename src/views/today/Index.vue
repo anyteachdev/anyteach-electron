@@ -11,7 +11,6 @@ export default {
   methods: {
     async getToday() {
       const data = await this.$api.schedule.DAY_TIMES("2020-03-07")
-      console.log(data)
     }
   },
   created() {
