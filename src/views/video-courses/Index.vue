@@ -1,6 +1,6 @@
 <template>
-  <div id="video-courses">
-    <div class="empty" v-if="!data.length">
+  <div id="video-courses" v-loading="data === undefined && $store.state.user.user_id">
+    <div class="empty" v-if="data && !data.length">
       <div>
         <h1>暂无视频课</h1>
         <p>去手机平台上逛逛吧</p>
@@ -8,11 +8,10 @@
       </div>
     </div>
     <div v-else class="courses" ref="wrapper" v-resize.throttle.1000="onResize">
-      <router-link
-        tag="div"
+      <div
         ref="item"
-        :to="'/videos/watch/' + item.id"
-        class="item"
+        @click="toVideo(item)"
+        class="course-item"
         v-for="(item, index) in data"
         :key="index"
       >
@@ -22,7 +21,8 @@
           </div>
         </div>
         <h2>{{ item.title }}</h2>
-      </router-link>
+        <h3>{{ item.unit.reduce((total, current) => total + current.lesson.length, 0) }} 个视频</h3>
+      </div>
     </div>
   </div>
 </template>
@@ -41,104 +41,28 @@ export default {
   },
   data() {
     return {
-      data: [
-        {
-          id: 1,
-          title: "测试课程测试课程对方是否胜多负少的发送到",
-          img: "https://cdn.anyteach.cn/upload/img/20200224/5e5331e64aa6d.jpg?imageView2/0/w/600/format/jpg"
-        },
-        {
-          id: 2,
-          title: "测试课程测试课程",
-          img: "https://cdn.anyteach.cn/upload/img/20200121/5e26af1dc4e85.jpg?imageView2/0/w/600/format/jpg"
-        },
-        {
-          id: 3,
-          title: "测试课程测试课程",
-          img: "https://cdn.anyteach.cn/upload/img/20191111/5dc92bce80a66.jpg"
-        },
-        {
-          id: 4,
-          title: "测试课程测试课程",
-          img: "https://cdn.anyteach.cn/upload/img/20191111/5dc92bce80a66.jpg"
-        },
-        {
-          id: 5,
-          title: "测试课程测试课程",
-          img: "https://cdn.anyteach.cn/upload/img/20200224/5e5331e64aa6d.jpg?imageView2/0/w/600/format/jpg"
-        },
-        {
-          id: 6,
-          title: "测试课程测试课程",
-          img: "https://cdn.anyteach.cn/upload/img/20200121/5e26af1dc4e85.jpg?imageView2/0/w/600/format/jpg"
-        },
-        {
-          id: 7,
-          title: "测试课程测试课程",
-          img: "https://cdn.anyteach.cn/upload/img/20191111/5dc92bce80a66.jpg"
-        },
-        {
-          id: 8,
-          title: "测试课程测试课程",
-          img: "https://cdn.anyteach.cn/upload/img/20191111/5dc92bce80a66.jpg"
-        },
-        {
-          id: 5,
-          title: "测试课程测试课程",
-          img: "https://cdn.anyteach.cn/upload/img/20200224/5e5331e64aa6d.jpg?imageView2/0/w/600/format/jpg"
-        },
-        {
-          id: 6,
-          title: "测试课程测试课程",
-          img: "https://cdn.anyteach.cn/upload/img/20200121/5e26af1dc4e85.jpg?imageView2/0/w/600/format/jpg"
-        },
-        {
-          id: 7,
-          title: "测试课程测试课程",
-          img: "https://cdn.anyteach.cn/upload/img/20191111/5dc92bce80a66.jpg"
-        },
-        {
-          id: 8,
-          title: "测试课程测试课程",
-          img: "https://cdn.anyteach.cn/upload/img/20191111/5dc92bce80a66.jpg"
-        },
-        {
-          id: 5,
-          title: "测试课程测试课程",
-          img: "https://cdn.anyteach.cn/upload/img/20200224/5e5331e64aa6d.jpg?imageView2/0/w/600/format/jpg"
-        },
-        {
-          id: 6,
-          title: "测试课程测试课程",
-          img: "https://cdn.anyteach.cn/upload/img/20200121/5e26af1dc4e85.jpg?imageView2/0/w/600/format/jpg"
-        },
-        {
-          id: 7,
-          title: "测试课程测试课程",
-          img: "https://cdn.anyteach.cn/upload/img/20191111/5dc92bce80a66.jpg"
-        },
-        {
-          id: 8,
-          title: "测试课程测试课程",
-          img: "https://cdn.anyteach.cn/upload/img/20191111/5dc92bce80a66.jpg"
-        },
-      ]
+      data: undefined
     }
   },
   methods: {
+    toVideo(item) {
+      const unit = item.unit[item.unit.length - 1]
+      const lesson = unit.lesson[unit.lesson.length - 1]
+      this.$router.push("/videos/watch/" + lesson.id)
+    },
+    async getClasses() {
+      this.data = await this.$api.video.CLASSES()
+    },
     onResize() {
+      const items = [...document.getElementsByClassName("course-item")]
+      if (!items.length) return
       this.$refs.item.forEach(i => {
         const totalWidth = this.$refs.wrapper.clientWidth
-        // const width = (totalWidth - 4 * 15) / 4
         const width = totalWidth * 0.25 - 11.25
-        // const height = width * 10 / 16
-        i.$el.style.width = width + "px"
-        // i.$el.style.height = height + "px"
-        // i.style.backgroundSize = width + "px"
+        i.style.width = width + "px"
       })
       this.$refs.img.forEach(i => {
         const totalWidth = this.$refs.wrapper.clientWidth
-        // const width = (totalWidth - 4 * 15) / 4
         const width = totalWidth * 0.25 - 11.25
         const height = width * 10 / 16
         i.style.width = width + "px"
@@ -146,8 +70,8 @@ export default {
       })
     }
   },
-  created() {
-    // this.getToday()
+  activated() {
+    this.getClasses()
   }
 }
 </script>
@@ -156,6 +80,7 @@ export default {
 @import "../../styles/common.scss";
 #video-courses {
   width: 100%;
+  min-height: 100vh;
 }
 
 * {
@@ -170,19 +95,28 @@ export default {
   grid-template-columns: $testWidth $testWidth $testWidth $testWidth;
   justify-content: space-between;
 
-  .item {
+  .course-item {
     margin-bottom: 15px;
     cursor: pointer;
     -webkit-user-select: none;
     display: inline-block;
     h2 {
       margin: 0;
+      padding: 0;
       font-size: 14px;
+      line-height: 1.2;
       display: -webkit-box;
       -webkit-line-clamp: 1;
       -webkit-box-orient: vertical;
       text-overflow: ellipsis;
       overflow: hidden;
+    }
+    h3 {
+      margin: 0;
+      padding: 0;
+      opacity: 0.6;
+      font-weight: 400;
+      font-size: 14px;
     }
     .img {
       border: $border;

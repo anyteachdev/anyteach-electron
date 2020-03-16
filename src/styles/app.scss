@@ -8,14 +8,17 @@
 }
 
 // Dark mode
-// @media (prefers-color-scheme: dark) {
-//   :root {
-//     --color-plain: white;
-//     --color-primary: hsl(348, 85%, 54%);
-//     --color-bgd: hsla(0, 0%, 10%, 1);
-//     --color-border: hsla(0, 0%, 15%, 1);
-//   }
-// }
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-plain: white;
+    --color-primary: hsl(348, 85%, 54%);
+    --color-bgd: hsla(0, 0%, 10%, 1);
+    --color-border: hsla(0, 0%, 15%, 1);
+  }
+  .el-loading-mask {
+    background: none;
+  }
+}
 
 body {
   background-color: $color-bgd;

@@ -46,7 +46,8 @@ const routes = [
         /* webpackChunkName: "Videos" */ "../views/video-courses/Index.vue"
       ),
     meta: {
-      sideNav: true
+      sideNav: true,
+      keepAlive: true
     }
   },
   {

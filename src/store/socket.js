@@ -4,6 +4,7 @@ export default {
   namespaced: true,
   state: {
     client: undefined,
+    id: null,
     queue: []
   },
   mutations: {
@@ -19,7 +20,7 @@ export default {
     init({ state, dispatch, rootState }) {
       state.client = io(NODE_API + "/user", {
         query: {
-          user_id: status ? rootState.user.user_id : 0
+          user_id: rootState.user.user_id || 0
         }
       })
       if (state.queue.length) {
@@ -28,6 +29,9 @@ export default {
         })
         state.queue = []
       }
+      state.client.on("socket_id", socket_id => {
+        state.id = socket_id
+      })
     },
     log({ state }, data) {
       if (!state.client) {
