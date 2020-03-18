@@ -3,14 +3,19 @@
     <h1>登陆 AnyTeach</h1>
     <el-form>
       <el-form-item>
-        <el-input prefix-icon="el-icon-mobile" type="number" v-model="form.phone">
+        <el-input
+          placeholder="已注册平台的手机号"
+          prefix-icon="el-icon-mobile"
+          type="number"
+          v-model="form.phone"
+        >
           <template slot="append">
             <el-button :disabled="!phoneValid" @click="sendSms">发送验证码</el-button>
           </template>
         </el-input>
       </el-form-item>
       <el-form-item>
-        <el-input type="number" v-model="form.code" />
+        <el-input placeholder="4 位短信验证码" type="number" v-model="form.code" />
       </el-form-item>
       <el-button type="primary" id="login-button" @click="submit">登陆</el-button>
     </el-form>

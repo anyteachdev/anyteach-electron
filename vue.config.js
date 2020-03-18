@@ -4,14 +4,37 @@ module.exports = {
       builderOptions: {
         // options placed here will be merged with default configuration and passed to electron-builder
         productName: "AnyTeach",
+        appId: "com.anyteach.desktop",
+        copyright: "版权所有 © 2020 厦门市睿博东方文化传媒有限公司",
         dmg: {
           sign: false
         },
         mac: {
+          target: "dmg",
+          publish: [
+            {
+              provider: "generic",
+              url: "https://anyteach2.oss-cn-shenzhen.aliyuncs.com/"
+            }
+          ],
           hardenedRuntime: true,
           gatekeeperAssess: false,
           entitlements: "build/entitlements.mac.plist",
           entitlementsInherit: "build/entitlements.mac.plist"
+        },
+        win: {
+          publish: [
+            {
+              provider: "generic",
+              url: "https://anyteach2.oss-cn-shenzhen.aliyuncs.com/"
+            }
+          ],
+          target: [
+            {
+              target: "nsis",
+              arch: ["x64", "ia32"]
+            }
+          ]
         }
       }
     }

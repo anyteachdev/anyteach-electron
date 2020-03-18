@@ -80,7 +80,7 @@ export default {
 @import "../../styles/common.scss";
 #video-courses {
   width: 100%;
-  min-height: 100vh;
+  min-height: 60vh;
 }
 
 * {

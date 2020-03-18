@@ -1,24 +1,43 @@
-"use strict"
+import log from "electron-log"
+import { app, protocol, BrowserWindow, Menu, Notification } from "electron"
+import { createProtocol } from "vue-cli-plugin-electron-builder/lib"
+import { autoUpdater } from "electron-updater"
 
-import {
-  app,
-  protocol,
-  BrowserWindow,
-  dialog,
-  nativeTheme,
-  Menu
-} from "electron"
-import {
-  createProtocol,
-  installVueDevtools
-} from "vue-cli-plugin-electron-builder/lib"
 const isDevelopment = process.env.NODE_ENV !== "production"
 const isProduction = process.env.VUE_APP_MODE === "production"
 const isMac = process.platform === "darwin"
 
-nativeTheme.on("updated", function theThemeHasChanged() {
-  console.log(nativeTheme.shouldUseDarkColors)
+autoUpdater.logger = log
+autoUpdater.logger.transports.file.level = "info"
+
+function sendStatusToWindow(text) {
+  log.info(text)
+  win.webContents.send("message", text)
+}
+
+autoUpdater.on("checking-for-update", () => {
+  sendStatusToWindow("Checking for update...")
 })
+autoUpdater.on("update-available", info => {
+  sendStatusToWindow("Update available.")
+})
+autoUpdater.on("update-not-available", info => {
+  sendStatusToWindow("Update not available.")
+})
+autoUpdater.on("error", err => {
+  sendStatusToWindow("Error in auto-updater. " + err)
+})
+autoUpdater.on("download-progress", progressObj => {
+  let log_message = "Download speed: " + progressObj.bytesPerSecond
+  log_message = log_message + " - Downloaded " + progressObj.percent + "%"
+  log_message =
+    log_message + " (" + progressObj.transferred + "/" + progressObj.total + ")"
+  sendStatusToWindow(log_message)
+})
+autoUpdater.on("update-downloaded", info => {
+  sendStatusToWindow("Update downloaded")
+})
+
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let win
@@ -29,17 +48,17 @@ protocol.registerSchemesAsPrivileged([
 ])
 
 function createWindow() {
-  // Create the browser window.
   win = new BrowserWindow({
     width: 1000,
     height: 600,
     minWidth: 800,
     minHeight: 600,
+    backgroundColor: "#e6e6e6",
     webPreferences: {
       nodeIntegration: true
     },
     title: "AnyTeach",
-    show: false
+    show: true
   })
 
   if (process.env.WEBPACK_DEV_SERVER_URL) {
@@ -130,6 +149,33 @@ const template = [
   }
 ]
 
+// This method will be called when Electron has finished
+// initialization and is ready to create browser windows.
+// Some APIs can only be used after this event occurs.
+app.on("ready", async () => {
+  if (process.env.VUE_APP_MODE === "development") {
+    // Install Vue Devtools
+    // Devtools extensions are broken in Electron 6.0.0 and greater
+    // See https://github.com/nklayman/vue-cli-plugin-electron-builder/issues/378 for more info
+    // Electron will not launch with Devtools extensions installed on Windows 10 with dark mode
+    // If you are not using Windows 10 dark mode, you may uncomment these lines
+    // In addition, if the linked issue is closed, you can upgrade electron and uncomment these lines
+    try {
+      await require("vue-cli-plugin-electron-builder/lib").installVueDevtools()
+    } catch (e) {
+      console.error("Vue Devtools failed to install:", e.toString())
+    }
+  }
+  createWindow()
+  if (isMac) {
+    const menu = Menu.buildFromTemplate(template)
+    Menu.setApplicationMenu(menu)
+  } else {
+    win.removeMenu()
+  }
+  autoUpdater.checkForUpdatesAndNotify()
+})
+
 // Quit when all windows are closed.
 app.on("window-all-closed", () => {
   // On macOS it is common for applications and their menu bar
@@ -145,28 +191,6 @@ app.on("activate", () => {
   if (win === null) {
     createWindow()
   }
-})
-
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
-app.on("ready", async () => {
-  const menu = Menu.buildFromTemplate(template)
-  Menu.setApplicationMenu(menu)
-  if (isDevelopment && !process.env.IS_TEST) {
-    // Install Vue Devtools
-    // Devtools extensions are broken in Electron 6.0.0 and greater
-    // See https://github.com/nklayman/vue-cli-plugin-electron-builder/issues/378 for more info
-    // Electron will not launch with Devtools extensions installed on Windows 10 with dark mode
-    // If you are not using Windows 10 dark mode, you may uncomment these lines
-    // In addition, if the linked issue is closed, you can upgrade electron and uncomment these lines
-    try {
-      await installVueDevtools()
-    } catch (e) {
-      console.error("Vue Devtools failed to install:", e.toString())
-    }
-  }
-  createWindow()
 })
 
 // Exit cleanly on request from parent process in development mode.
