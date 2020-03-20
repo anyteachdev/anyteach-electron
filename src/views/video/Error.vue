@@ -3,9 +3,9 @@
     <div>
       <i class="anyteachicon anyteach-cuowu" />
       <h1>{{ title }}</h1>
-      <p>{{ msg }}</p>
+      <p v-if="msg">{{ msg }}</p>
       <el-link type="primary" @click="$emit('retry')">再试一次</el-link>
-      <p class="error">错误代码：{{ code }}</p>
+      <p v-if="code" class="error">错误代码：{{ code }}</p>
     </div>
   </div>
 </template>
@@ -22,30 +22,20 @@ export default {
     msg: {
       default: ""
     }
-  },
-  methods: {
-    reload() {
-      location.reload()
-    }
   }
 }
 </script>
 <style lang="scss" scoped>
 #error {
-  position: fixed;
-  left: 0;
-  top: $topNavHeight;
-  width: 100%;
-  @include height(100vh);
-  z-index: 1000;
+  position: relative;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.95);
   text-align: center;
   -webkit-user-select: none;
   .error {
-    position: fixed;
+    position: absolute;
     bottom: 20px;
     width: 100%;
     padding: 0 30px;
@@ -62,6 +52,7 @@ export default {
   }
   p {
     margin: 0 0 20px 0;
+    color: white;
   }
   h1,
   i {

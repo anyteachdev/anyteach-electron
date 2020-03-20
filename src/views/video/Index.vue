@@ -1,6 +1,5 @@
 <template>
-  <div id="video" v-loading="data === undefined || playInfo === undefined">
-    <Error v-if="error" @retry="init" title="无法播放" :code="error.code" :msg="error.msg" />
+  <div id="video" v-loading="data === undefined && playInfo === undefined">
     <Wake
       v-if="player"
       :interval="20"
@@ -9,10 +8,11 @@
       @play="player.play()"
     />
     <div class="top" ref="top">
-      <div id="player" :style="getPlayerStyle()">
+      <div id="player" :style="getPlayerStyle()" v-loading="playInfo === undefined">
         <Watermark v-if="player" />
+        <Error v-if="error" @retry="init" title="无法播放" :code="error.code" :msg="error.msg" />
       </div>
-      <div class="related" v-if="data && player">
+      <div class="related" v-if="data">
         <div class="unit" v-for="unit in data.unit" :key="unit.id">
           <h4 v-if="data.unit.length > 1">{{ unit.title }}</h4>
           <div class="lesson-wrapper">
@@ -34,13 +34,13 @@
         </div>
       </div>
     </div>
-    <div class="info" v-if="data && playInfo">
+    <div class="info" v-if="data">
       <h2>
         {{ data.title }}
-        <span v-if="data.unit.length > 1">· {{ playInfo.unit.title }}</span>
+        <span v-if="playInfo && data.unit.length > 1">· {{ playInfo.unit.title }}</span>
       </h2>
-      <h1>{{ playInfo.lesson.title }}</h1>
-      <p v-if="playInfo.lesson.subtitle">{{ playInfo.lesson.subtitle }}</p>
+      <h1>{{ lesson.title }}</h1>
+      <p v-if="lesson.subtitle">{{ lesson.subtitle }}</p>
     </div>
   </div>
 </template>
@@ -62,9 +62,9 @@ export default {
       shouldWake: false,
       data: undefined,
       playInfo: undefined,
+      error: undefined,
       height: 400,
       width: 711,
-      error: null
     }
   },
   watch: {
@@ -74,10 +74,11 @@ export default {
       }
     },
     $route: function (val) {
-      this.player.dispose()
+      if (this.player) {
+        this.player.dispose()
+      }
       this.player = null
       this.shouldWake = false
-      this.data = undefined
       this.playInfo = undefined
       this.getPlayInfo()
       this.getData()
@@ -86,6 +87,16 @@ export default {
   computed: {
     socket_id() {
       return this.$store.state.socket.id
+    },
+    allLessons() {
+      if (!this.data) return null
+      return this.data.unit.map(unit => {
+        return unit.lesson
+      }).flat()
+    },
+    lesson() {
+      if (!this.allLessons) return null
+      return this.allLessons.find(i => i.id.toString() === this.$route.params.id)
     }
   },
   created() {
@@ -94,9 +105,9 @@ export default {
   },
   methods: {
     init() {
-      this.data = undefined
       this.playInfo = undefined
       this.error = undefined
+      this.shouldWake = false
       if (this.socket_id) {
         this.getPlayInfo()
       }
@@ -221,6 +232,7 @@ export default {
 <style lang="scss" scoped>
 @import url(https://g.alicdn.com/de/prismplayer/2.8.2/skins/default/aliplayer-min.css);
 @import "./style.scss";
+
 #video {
   -webkit-user-select: none;
   max-width: 1000px;
@@ -270,7 +282,6 @@ export default {
       min-height: $size;
       min-width: $size;
       border-radius: $size;
-      // margin: 0 2px;
       color: white;
       position: relative;
       span,
@@ -312,6 +323,7 @@ export default {
 
 #player {
   overflow: hidden;
+  background: hsla(0, 0%, 15%, 1);
 }
 
 .info {
