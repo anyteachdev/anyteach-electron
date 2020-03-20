@@ -46,8 +46,7 @@ export default {
   },
   methods: {
     toVideo(item) {
-      const unit = item.unit[item.unit.length - 1]
-      const lesson = unit.lesson[unit.lesson.length - 1]
+      const lesson = item.unit[0].lesson[0]
       this.$router.push("/videos/watch/" + lesson.id)
     },
     async getClasses() {

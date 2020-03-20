@@ -1,5 +1,6 @@
 <template>
   <div id="video" v-loading="data === undefined || playInfo === undefined">
+    <Error v-if="error" @retry="init" title="无法播放" :code="error.code" :msg="error.msg" />
     <Wake
       v-if="player"
       :interval="20"
@@ -8,27 +9,36 @@
       @play="player.play()"
     />
     <div class="top" ref="top">
-      <div id="player">
+      <div id="player" :style="getPlayerStyle()">
         <Watermark v-if="player" />
       </div>
       <div class="related" v-if="data && player">
         <div class="unit" v-for="unit in data.unit" :key="unit.id">
           <h4 v-if="data.unit.length > 1">{{ unit.title }}</h4>
-          <div
-            tag="div"
-            class="item"
-            @click="toVideo(lesson.id)"
-            v-for="lesson in unit.lesson"
-            :key="lesson.id"
-          >
-            <i class="el-icon-video-play" />
-            {{ lesson.title }}
+          <div class="lesson-wrapper">
+            <div
+              tag="div"
+              class="item"
+              @click="toVideo(lesson.id)"
+              v-for="lesson in unit.lesson"
+              :class="{ active : lesson.id.toString() === $route.params.id }"
+              :key="lesson.id"
+            >
+              <i
+                v-if="lesson.id.toString() === $route.params.id"
+                class="anyteachicon anyteach-play1"
+              />
+              <span>{{ lesson.sort }}</span>
+            </div>
           </div>
         </div>
       </div>
     </div>
     <div class="info" v-if="data && playInfo">
-      <h2>{{ data.title }}</h2>
+      <h2>
+        {{ data.title }}
+        <span v-if="data.unit.length > 1">· {{ playInfo.unit.title }}</span>
+      </h2>
       <h1>{{ playInfo.lesson.title }}</h1>
       <p v-if="playInfo.lesson.subtitle">{{ playInfo.lesson.subtitle }}</p>
     </div>
@@ -38,18 +48,23 @@
 <script>
 import Wake from "@/components/Wake"
 import Watermark from "./Watermark"
+import Error from "./Error"
 export default {
   name: "Video",
   components: {
     Wake,
-    Watermark
+    Watermark,
+    Error
   },
   data() {
     return {
       player: null,
       shouldWake: false,
       data: undefined,
-      playInfo: undefined
+      playInfo: undefined,
+      height: 400,
+      width: 711,
+      error: null
     }
   },
   watch: {
@@ -75,12 +90,21 @@ export default {
   },
   created() {
     this.setKeys()
-    if (this.socket_id) {
-      this.getPlayInfo()
-    }
-    this.getData()
+    this.init()
   },
   methods: {
+    init() {
+      this.data = undefined
+      this.playInfo = undefined
+      this.error = undefined
+      if (this.socket_id) {
+        this.getPlayInfo()
+      }
+      this.getData()
+    },
+    getPlayerStyle() {
+      return `min-width: ${this.width}px; min-height: ${this.height}px;`
+    },
     toVideo(id) {
       if (id.toString() !== this.$route.params.id) {
         this.$router.push("/videos/watch/" + id)
@@ -99,8 +123,10 @@ export default {
       if (code === "1000") {
         this.playInfo = msg
         this.initPlayer()
+      } else {
+        this.playInfo = null
+        this.error = { code, msg }
       }
-
     },
     setKeys() {
       document.onkeydown = event => {
@@ -166,13 +192,13 @@ export default {
     initPlayer() {
       const w = this.playInfo.lesson.width
       const h = this.playInfo.lesson.height
-      const height = 350
-      this.$refs.top.style.height = height + "px"
+      this.width = this.height * w / h
+      this.$refs.top.style.height = this.height + "px"
       this.player = new Aliplayer({
         id: "player",
-        width: (height * w / h) + "px",
-        height: height + "px",
-        autoplay: false,
+        width: this.width + "px",
+        height: this.height + "px",
+        autoplay: true,
         vid: this.playInfo.lesson.video_id,
         playauth: this.playInfo.PlayAuth,
         cover: "",
@@ -209,30 +235,76 @@ export default {
     display: flex;
   }
   .related {
-    padding: 10px 0 10px 10px;
+    padding: 10px;
     overflow: scroll;
     flex-grow: 1;
-    background: $color-border;
+    background: hsla(0, 0%, 10%, 1);
     h3 {
       margin: 0;
       padding: 10px 20px 10px 10px;
     }
     h4 {
-      margin: 0;
+      margin: 0 0 5px 0;
       padding: 0;
+      font-size: 14px;
+      font-weight: 400;
+      opacity: 0.5;
+      color: white;
+    }
+    .unit {
+      margin-bottom: 10px;
+      &:last-of-type {
+        margin: 0;
+      }
+    }
+    .lesson-wrapper {
+      display: flex;
+      flex-wrap: wrap;
     }
     .item {
       cursor: pointer;
-      font-weight: 500;
-      // padding: 10px 20px 10px 10px;
+      font-family: DIN alternate;
       font-size: 14px;
-      transition: all 0.2s;
-      $radius: 30px;
-      border-top-left-radius: $radius;
-      border-bottom-left-radius: $radius;
+      transition: all 0.1s;
+      $size: 30px;
+      min-height: $size;
+      min-width: $size;
+      border-radius: $size;
+      // margin: 0 2px;
+      color: white;
+      position: relative;
+      span,
+      i {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
       &:hover {
-        background: $color-primary;
-        color: white;
+        color: $color-primary;
+        background: hsla(0, 0%, 0, 1);
+      }
+    }
+    .active,
+    .active:hover {
+      background: $color-primary;
+      color: $color-bgd;
+    }
+    .active {
+      span {
+        opacity: 0;
+      }
+      span,
+      i {
+        transition: all 0.3s;
+      }
+      &:hover {
+        span {
+          opacity: 1;
+        }
+        i {
+          opacity: 0;
+        }
       }
     }
   }

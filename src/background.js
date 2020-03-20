@@ -49,10 +49,10 @@ protocol.registerSchemesAsPrivileged([
 
 function createWindow() {
   win = new BrowserWindow({
-    width: 1000,
-    height: 600,
-    minWidth: 800,
-    minHeight: 600,
+    width: 1200,
+    height: 700,
+    minWidth: 1000,
+    minHeight: 600 + 22,
     backgroundColor: "#e6e6e6",
     webPreferences: {
       nodeIntegration: true

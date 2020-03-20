@@ -23,7 +23,8 @@ export default {
   top: 0;
   width: 200%;
   overflow: hidden;
-  opacity: 0.4;
+  opacity: 0.5;
+  background: rgba(0, 0, 0, 0.1);
   pointer-events: none;
   -webkit-user-select: none;
 }
