@@ -7,7 +7,7 @@
         <QR url="http://wx.anyteach.cn" />
       </div>
     </div>
-    <div v-else class="courses" ref="wrapper" v-resize.throttle.1000="onResize">
+    <div v-else class="courses" ref="wrapper">
       <div
         ref="item"
         @click="toVideo(item)"
@@ -30,7 +30,7 @@
 <script>
 import resize from "vue-resize-directive"
 import QR from "@/components/QR"
-
+import { ipcRenderer } from "electron"
 export default {
   name: "VideoCourses",
   directives: {
@@ -51,6 +51,7 @@ export default {
     },
     async getClasses() {
       this.data = await this.$api.video.CLASSES()
+      this.$nextTick(() => this.onResize())
     },
     onResize() {
       const items = [...document.getElementsByClassName("course-item")]
@@ -71,6 +72,9 @@ export default {
   },
   activated() {
     this.getClasses()
+    ipcRenderer.on("will-resize", (event, newBounds) => {
+      this.onResize()
+    })
   }
 }
 </script>

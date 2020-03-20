@@ -1,5 +1,5 @@
 import log from "electron-log"
-import { app, protocol, BrowserWindow, Menu, Notification } from "electron"
+import { app, protocol, BrowserWindow, Menu, ipcMain } from "electron"
 import { createProtocol } from "vue-cli-plugin-electron-builder/lib"
 import { autoUpdater } from "electron-updater"
 
@@ -77,6 +77,10 @@ function createWindow() {
 
   win.on("closed", () => {
     win = null
+  })
+
+  win.on("will-resize", (event, newBounds) => {
+    win.webContents.send("will-resize", newBounds)
   })
 }
 
