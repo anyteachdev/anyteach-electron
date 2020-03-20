@@ -93,9 +93,8 @@ export default {
   width: 100%;
   overflow: hidden;
   display: grid;
-  $testWidth: calc(25% - 11.25px);
-  // grid-template-columns: 24% 24% 24% 24%;
-  grid-template-columns: $testWidth $testWidth $testWidth $testWidth;
+  $columnWidth: calc(25% - 11.25px);
+  grid-template-columns: $columnWidth $columnWidth $columnWidth $columnWidth;
   justify-content: space-between;
 
   .course-item {

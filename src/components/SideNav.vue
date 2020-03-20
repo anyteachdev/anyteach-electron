@@ -1,5 +1,6 @@
 <template>
   <div id="sidenav">
+    <span class="version">v{{ version }}</span>
     <router-link
       class="route"
       v-for="route in routes"
@@ -15,10 +16,13 @@
 </template>
 
 <script>
+import { version } from "../../package.json"
+
 export default {
   name: "SideNav",
   data() {
     return {
+      version,
       routes: [
         {
           to: "/",
@@ -58,6 +62,18 @@ export default {
   @include height(100vh);
   width: 100%;
   border-right: $border;
+  position: relative;
+  -webkit-user-select: none;
+
+  .version {
+    position: absolute;
+    bottom: 20px;
+    text-align: center;
+    width: 100%;
+    opacity: 0.25;
+    font-size: 12px;
+    font-family: DIN alternate;
+  }
 
   .route {
     display: block;
