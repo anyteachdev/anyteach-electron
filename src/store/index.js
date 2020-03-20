@@ -85,6 +85,11 @@ export default new Vuex.Store({
       const { code } = await api.auth.LOGOUT()
       if (code === "1000") {
         context.dispatch("login", false)
+        context.dispatch("socket/log", {
+          url: location.href,
+          name: "logout",
+          data: navigator.userAgent
+        })
         context.commit("user", {})
         context.commit("jwt", null)
       }
