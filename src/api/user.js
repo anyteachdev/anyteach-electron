@@ -1,11 +1,8 @@
 import axios from "axios"
+import axiosRetry from "axios-retry"
 import { PHP_API } from "./config"
 
-const prefix = PHP_API + "/index/user/"
-
-function path(method) {
-  return prefix + method
-}
+axiosRetry(axios, { retries: 3 })
 
 export default {
   FIND: async id => {
@@ -24,7 +21,7 @@ export default {
   },
   TYPE: async (u_id = "") => {
     const config = {
-      url: path("type"),
+      url: PHP_API + "/index/user/type",
       method: "GET",
       params: {
         u_id
@@ -39,8 +36,7 @@ export default {
   },
   PROFILE: async () => {
     const config = {
-      url: path("profile/"),
-      method: "GET"
+      url: PHP_API + "/index/user/profile"
     }
     try {
       const { data } = await axios(config)
@@ -62,7 +58,7 @@ export default {
   },
   IS_LOGIN: async () => {
     const config = {
-      url: path("/isSession"),
+      url: PHP_API + "/index/user/isSession",
       type: "GET",
       xhrFields: {
         withCredentials: true
@@ -78,7 +74,7 @@ export default {
   },
   FOLLOW_STATUS: async () => {
     const config = {
-      url: path("follow"),
+      url: PHP_API + "/index/user/follow",
       type: "GET"
     }
     try {
@@ -131,7 +127,7 @@ export default {
     }
   },
   LOCATION: async () => {
-    const url = path("getUserCityV2")
+    const url = PHP_API + "/index/user/getUserCityV2"
     try {
       const { data } = await axios(url)
       return data.msg
@@ -140,7 +136,7 @@ export default {
     }
   },
   CONTACT: async () => {
-    const url = path("contact")
+    const url = PHP_API + "/index/user/contact"
     try {
       const { data } = await axios(url)
       const { code, msg } = data

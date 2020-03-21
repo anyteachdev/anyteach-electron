@@ -23,6 +23,7 @@
   "main": "background.js",
   "dependencies": {
     "axios": "^0.19.2",
+    "axios-retry": "^3.1.2",
     "core-js": "^3.6.4",
     "electron-log": "^4.1.0",
     "element-ui": "^2.13.0",

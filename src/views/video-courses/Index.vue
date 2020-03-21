@@ -28,14 +28,10 @@
 </template>
 
 <script>
-import resize from "vue-resize-directive"
 import QR from "@/components/QR"
 import { ipcRenderer } from "electron"
 export default {
   name: "VideoCourses",
-  directives: {
-    resize,
-  },
   components: {
     QR
   },
