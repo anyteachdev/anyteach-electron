@@ -1,4 +1,4 @@
-@import url(https://at.alicdn.com/t/font_258157_ge05qjymsu9.css);
+@import url(https://at.alicdn.com/t/font_258157_hpi4922efzh.css);
 
 :root {
   --color-plain: hsla(0, 0%, 10%, 1);
@@ -29,14 +29,15 @@
   }
 }
 
-#app {
-  animation: fadein 0.5s;
-}
 body {
   background-color: $color-bgd;
   color: $color-plain;
 }
 
+#app,
+body {
+  animation: fadein 0.8s;
+}
 html,
 body {
   width: 100%;

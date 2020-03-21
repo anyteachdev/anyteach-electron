@@ -3,7 +3,7 @@
   "author": "陈准 Keith Chen",
   "description": "AnyTeach 的桌面端软件",
   "productName": "AnyTeach",
-  "version": "0.2.10",
+  "version": "0.3.0",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",

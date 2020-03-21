@@ -1,0 +1,73 @@
+.button {
+  margin: 25px auto 0 auto;
+  display: block;
+}
+.input-wrapper {
+  padding-bottom: 0px;
+  position: relative;
+  .hint {
+    position: absolute;
+    bottom: -30px;
+    font-size: 11px;
+    color: $color-primary;
+    font-weight: 500;
+    width: 100%;
+    text-align: center;
+  }
+
+  .input {
+    padding: 10px 0;
+    border-top: 1px solid $color-border;
+    border-bottom: 1px solid $color-border;
+    display: flex;
+    align-items: center;
+    transition: all 0.1s;
+    i {
+      transition: all 0.1s;
+      color: rgba(0, 0, 0, 0.3);
+      &:active {
+        color: $color-primary;
+      }
+    }
+    span {
+      -webkit-user-select: none;
+      font-size: 14px;
+      margin: 0;
+      padding: 0 5px 0 0;
+      opacity: 0.4;
+    }
+    input {
+      width: 100%;
+      border: none;
+      margin: 0;
+      padding: 0 0 2px 0;
+      font-size: 14px;
+      &:focus {
+        outline: none;
+      }
+      &::-webkit-input-placeholder,
+      &::placeholder {
+        line-height: normal;
+        font-weight: 400;
+        margin: 0;
+        padding: 0;
+        opacity: 0.5;
+      }
+    }
+    .edit {
+      font-size: 12px;
+      position: absolute;
+      right: 0;
+      color: $color-primary;
+      opacity: 1;
+      font-weight: bold;
+      transition: all 0.1s;
+      &:active {
+        opacity: 0.5;
+      }
+    }
+  }
+  .no-top {
+    border-top: none;
+  }
+}

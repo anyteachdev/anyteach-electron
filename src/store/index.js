@@ -74,6 +74,8 @@ export default new Vuex.Store({
         })
       }
       if (status) {
+        state.history = []
+        state.routeIndex = -1
         dispatch("socket/log", {
           url: location.href,
           name: "login",
