@@ -1,5 +1,5 @@
 .button {
-  margin: 25px auto 0 auto;
+  margin: 30px auto 0 auto;
   display: block;
 }
 .input-wrapper {
@@ -16,12 +16,16 @@
   }
 
   .input {
-    padding: 10px 0;
+    padding: 12px 0;
     border-top: 1px solid $color-border;
     border-bottom: 1px solid $color-border;
     display: flex;
     align-items: center;
     transition: all 0.1s;
+    span,
+    input {
+      font-size: 15px;
+    }
     i {
       transition: all 0.1s;
       color: rgba(0, 0, 0, 0.3);
@@ -31,19 +35,20 @@
     }
     span {
       -webkit-user-select: none;
-      font-size: 14px;
       margin: 0;
-      padding: 0 5px 0 0;
+      padding: 0 6px 0 0;
       opacity: 0.4;
     }
     input {
       width: 100%;
       border: none;
       margin: 0;
-      padding: 0 0 2px 0;
-      font-size: 14px;
+      padding: 0;
       &:focus {
         outline: none;
+      }
+      &:disabled {
+        background: none;
       }
       &::-webkit-input-placeholder,
       &::placeholder {

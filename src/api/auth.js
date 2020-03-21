@@ -31,7 +31,7 @@ export default {
       const config = {
         url,
         method: "POST",
-        data: { phone, number }
+        data: { phone, number, type: "desktop" }
       }
       const { data } = await axios(config)
       return data

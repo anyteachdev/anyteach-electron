@@ -74,13 +74,13 @@ img {
 h1 {
   margin: 0;
   padding: 0 0 3px 0;
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 600;
 }
 p {
   margin: 0;
   padding: 0;
   opacity: 0.6;
-  font-size: 14px;
+  font-size: 16px;
 }
 </style>

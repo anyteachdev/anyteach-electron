@@ -1,7 +1,7 @@
 <template>
   <div id="phone">
     <div class="input-wrapper">
-      <div class="input" :class="{ active: state.active === 'phone' }">
+      <div class="input">
         <span>+86</span>
         <input
           :disabled="!isActive"
@@ -82,10 +82,12 @@ export default {
         const { code, msg } = await this.$api.auth.SEND_SMS(this.phone)
         this.state.loading = false
         if (code != 1000) {
+          this.$refs.input.focus()
           return this.hint = `${msg}（${code}）`
         }
         this.state.stage = 1
       } catch (err) {
+        this.$refs.input.focus()
         this.state.stage = 0
         this.state.loading = false
         this.hint = "发送验证码失败，请稍后重试"

@@ -174,7 +174,7 @@ app.on("ready", async () => {
   if (isMac) {
     const menu = Menu.buildFromTemplate(template)
     Menu.setApplicationMenu(menu)
-  } else {
+  } else if (isProduction) {
     win.removeMenu()
   }
   autoUpdater.checkForUpdatesAndNotify()

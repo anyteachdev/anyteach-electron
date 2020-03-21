@@ -47,14 +47,8 @@ export default {
 <style lang="scss" scoped>
 #login {
   -webkit-user-select: none;
-  width: 200px;
+  width: 250px;
   margin: 0 auto;
-  padding: 50px 0 0 0;
-  h1 {
-    // text-align: center;
-  }
-  #login-button {
-    width: 100%;
-  }
+  padding: 100px 0 0 0;
 }
 </style>

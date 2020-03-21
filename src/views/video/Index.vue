@@ -248,7 +248,7 @@ export default {
   }
   .related {
     padding: 10px;
-    overflow: scroll;
+    overflow-y: scroll;
     flex-grow: 1;
     background: hsla(0, 0%, 10%, 1);
     h3 {
