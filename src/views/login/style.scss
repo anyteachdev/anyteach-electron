@@ -1,3 +1,24 @@
+.fade-enter-active,
+.fade-leave-active {
+  transition: all 0.3s ease;
+}
+
+.fade-enter {
+  transform: translateY(15px);
+  opacity: 0;
+}
+.fade-leave-to {
+  transform: translateY(-15px);
+  opacity: 0;
+}
+
+.buttons {
+  .el-link {
+    display: block;
+    text-align: center;
+    margin-top: 5px;
+  }
+}
 .button {
   margin: 30px auto 0 auto;
   display: block;

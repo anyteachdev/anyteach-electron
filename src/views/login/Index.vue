@@ -1,15 +1,33 @@
 <template>
   <div id="login">
-    <div v-show="state.stage < 2" class="wrapper">
+    <el-dialog title="请完整阅读至底部" :visible.sync="state.terms" :modal-append-to-body="false">
+      <Terms
+        v-if="state.stage === 0"
+        @agree="state.stage = 1; state.terms = false"
+        :buttons="true"
+      />
+    </el-dialog>
+    <div class="wrapper">
       <Welcome :stage="state.stage" />
-      <Phone :stage="state.stage" @phone="phone = $event" @stage="state.stage = $event" />
+      <transition name="fade" mode="out-in">
+        <el-button
+          v-if="state.stage === 0"
+          @click="state.terms = true"
+          type="primary"
+          round
+          class="button"
+        >手机号登录</el-button>
+        <Phone
+          v-if="state.stage > 0"
+          :stage="state.stage"
+          @phone="phone = $event"
+          @stage="state.stage = $event"
+        />
+      </transition>
       <fade>
-        <Code @stage="state.stage = $event" :phone="phone" v-if="state.stage === 1" />
+        <Code @stage="state.stage = $event" :phone="phone" v-if="state.stage === 2" key="0" />
       </fade>
     </div>
-    <fade>
-      <Terms @stage="state.stage = $event" v-if="state.stage === 2" />
-    </fade>
   </div>
 </template>
 
@@ -17,7 +35,7 @@
 import Welcome from "./Welcome"
 import Phone from "./Phone"
 import Code from "./Code"
-import Terms from "./Terms"
+import Terms from "@/views/terms/Terms"
 export default {
   name: "Login",
   components: {
@@ -30,8 +48,8 @@ export default {
     return {
       numRegExp: new RegExp("^[0-9]*$"),
       state: {
-        loading: false,
-        stage: 0
+        stage: 0,
+        terms: false
       },
       phone: "",
     }
@@ -50,6 +68,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@import "./style.scss";
 #login {
   -webkit-user-select: none;
 }

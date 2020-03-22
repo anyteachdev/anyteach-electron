@@ -73,9 +73,8 @@ export default {
         this.$store.commit("user", user)
         this.$store.commit("jwt", jwt)
         this.$store.dispatch("login")
-        // this.$router.push("/")
-        // this.$message.success("登陆成功")
-        this.$emit("stage", 2)
+        this.$router.push("/")
+        this.$message.success("登陆成功")
       } catch (error) {
         this.state.loading = false
         this.hint = "登陆失败，请重试"

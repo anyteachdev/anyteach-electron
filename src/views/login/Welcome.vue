@@ -1,12 +1,12 @@
 <template>
   <div id="welcome" ref="main">
     <transition name="fade" mode="out-in">
-      <div class="item" v-if="stage === 0" key="0">
+      <div class="item" v-if="stage < 2" key="0">
         <img src="@/../build/icon.png" />
         <h1>AnyTeach</h1>
         <p>观看直播课回放</p>
       </div>
-      <div class="item" v-if="stage === 1" key="1">
+      <div class="item" v-if="stage === 2" key="1">
         <i class="anyteachicon anyteach-yanzhengma" />
         <h1>请查收短信</h1>
       </div>
@@ -24,10 +24,10 @@ export default {
   },
   watch: {
     stage: function (val) {
-      if (val === 0) {
+      if (val < 2) {
         this.$refs.main.style.height = "170px"
       }
-      if (val === 1) {
+      if (val === 2) {
         this.$refs.main.style.height = "110px"
       }
     }
@@ -36,16 +36,14 @@ export default {
 </script>
 <style lang="scss" scoped>
 @import "../../assets/animate.css";
+@import "./style.scss";
 #welcome {
   text-align: center;
   height: 170px;
   transition: all 0.3s;
   position: relative;
 }
-.fade-enter-active,
-.fade-leave-active {
-  transition: all 0.3s ease;
-}
+
 .item {
   position: absolute;
   width: 100%;
@@ -53,15 +51,6 @@ export default {
     color: $color-primary;
     font-size: 50px;
   }
-}
-
-.fade-enter {
-  transform: translateY(15px);
-  opacity: 0;
-}
-.fade-leave-to {
-  transform: translateY(-15px);
-  opacity: 0;
 }
 
 .animated {

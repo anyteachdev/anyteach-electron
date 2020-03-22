@@ -18,21 +18,24 @@
             class="anyteachicon anyteach-gary"
             @click="phone = ''; $refs.input.focus()"
           />
-          <span @click="$emit('stage', 0); $refs.input.focus()" class="edit" v-if="!isActive">更改</span>
+          <span @click="$emit('stage', 1); $refs.input.focus()" class="edit" v-if="!isActive">更改</span>
         </fade>
       </div>
       <fade enter="shake">
         <p class="hint" v-if="hint && isActive">{{ hint }}</p>
       </fade>
     </div>
-    <el-button
-      :loading="state.loading"
-      v-if="isActive"
-      @click="send"
-      type="primary"
-      round
-      class="button"
-    >发送验证码</el-button>
+    <div class="buttons">
+      <el-button
+        :loading="state.loading"
+        v-if="isActive"
+        @click="send"
+        type="primary"
+        round
+        class="button"
+      >发送验证码</el-button>
+      <el-link v-if="isActive" :underline="false" @click="$emit('stage', 0)">取消</el-link>
+    </div>
   </div>
 </template>
 
@@ -51,7 +54,7 @@ export default {
   },
   computed: {
     isActive() {
-      return this.stage === 0
+      return this.stage === 1
     }
   },
   watch: {
@@ -84,10 +87,10 @@ export default {
           this.$refs.input.focus()
           return this.hint = `${msg}（${code}）`
         }
-        this.$emit("stage", 1)
+        this.$emit("stage", 2)
       } catch (err) {
         this.$refs.input.focus()
-        this.$emit("stage", 0)
+        this.$emit("stage", 1)
         this.state.loading = false
         this.hint = "发送验证码失败，请稍后重试"
       }
