@@ -18,7 +18,7 @@
             class="anyteachicon anyteach-gary"
             @click="phone = ''; $refs.input.focus()"
           />
-          <span @click="state.stage = 0; $refs.input.focus()" class="edit" v-if="!isActive">更改</span>
+          <span @click="$emit('stage', 0); $refs.input.focus()" class="edit" v-if="!isActive">更改</span>
         </fade>
       </div>
       <fade enter="shake">
@@ -38,10 +38,10 @@
 
 <script>
 export default {
+  props: ["stage"],
   data() {
     return {
       state: {
-        stage: 0,
         loading: false
       },
       numRegExp: new RegExp("^[0-9]*$"),
@@ -51,12 +51,11 @@ export default {
   },
   computed: {
     isActive() {
-      return this.state.stage === 0
+      return this.stage === 0
     }
   },
   watch: {
-    "state.stage": function (val) {
-      this.$emit("stage", val)
+    "stage": function (val) {
       this.$emit("phone", this.phone)
     },
     phone: function (newVal, oldVal) {
@@ -85,10 +84,10 @@ export default {
           this.$refs.input.focus()
           return this.hint = `${msg}（${code}）`
         }
-        this.state.stage = 1
+        this.$emit("stage", 1)
       } catch (err) {
         this.$refs.input.focus()
-        this.state.stage = 0
+        this.$emit("stage", 0)
         this.state.loading = false
         this.hint = "发送验证码失败，请稍后重试"
       }
