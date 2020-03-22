@@ -8,7 +8,8 @@
       @play="player.play()"
     />
     <div class="top" ref="top">
-      <div id="player" :style="getPlayerStyle()" v-loading="playInfo === undefined">
+      <div id="player-wrapper" :style="getPlayerStyle()" v-loading="playInfo === undefined">
+        <div id="player" :style="getPlayerStyle()"></div>
         <Watermark v-if="player" />
         <Error v-if="error" @retry="init" title="无法播放" :code="error.code" :msg="error.msg" />
       </div>
@@ -114,7 +115,7 @@ export default {
       this.getData()
     },
     getPlayerStyle() {
-      return `min-width: ${this.width}px; min-height: ${this.height}px;`
+      return `min-width: ${this.width}px; min-height: ${this.height}px; width: ${this.width}px; height: ${this.height}px;`
     },
     toVideo(id) {
       if (id.toString() !== this.$route.params.id) {
@@ -276,9 +277,9 @@ export default {
     .item {
       cursor: pointer;
       font-family: DIN alternate;
-      font-size: 14px;
+      font-size: 16px;
       transition: all 0.1s;
-      $size: 30px;
+      $size: 40px;
       min-height: $size;
       min-width: $size;
       border-radius: $size;
@@ -321,15 +322,15 @@ export default {
   }
 }
 
-#player {
+#player,
+#player-wrapper {
   overflow: hidden;
+  position: relative;
   background: hsla(0, 0%, 15%, 1);
 }
 
 .info {
   transition: all 0.3s;
-  padding: 20px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0);
 
   h1 {
     margin: 0;

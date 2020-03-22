@@ -2,8 +2,17 @@
   #video {
     padding-top: 30px;
     .info {
+      border-bottom: 1px solid $color-border;
       padding: 20px 0;
-      border-color: $color-border;
+    }
+  }
+}
+@media only screen and (max-width: 1000px) {
+  #video {
+    padding-top: 0;
+    .info {
+      padding: 20px;
+      border-color: rgba(0, 0, 0, 0);
     }
   }
 }
