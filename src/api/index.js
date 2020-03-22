@@ -4,7 +4,8 @@ import auth from "./auth"
 import user from "./user"
 import schedule from "./schedule"
 import video from "./video"
+import api from "./api"
 
 axios.defaults.withCredentials = true
 
-export default { PHP_API, NODE_API, auth, user, schedule, video }
+export default { PHP_API, NODE_API, auth, user, schedule, video, api }

@@ -15,23 +15,15 @@
 <script>
 export default {
   name: "Home",
-  methods: {
-  }
 }
 </script>
 
 <style lang="scss" scoped>
-:root {
-  color-scheme: light dark;
-  supported-color-schemes: light dark;
-}
 #home {
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
   @include height(80vh);
-  .text {
-  }
 }
 </style>

@@ -17,14 +17,20 @@ const routes = [
   {
     path: "/login",
     name: "Login",
-    component: () =>
-      import(/* webpackChunkName: "login" */ "../views/login/Index.vue")
+    component: () => import("../views/login/Index.vue")
   },
   {
     path: "/today",
     name: "Today",
-    component: () =>
-      import(/* webpackChunkName: "today" */ "../views/today/Index.vue"),
+    component: () => import("../views/today/Index.vue"),
+    meta: {
+      sideNav: true
+    }
+  },
+  {
+    path: "/terms",
+    name: "Terms",
+    component: () => import("../views/terms/Index.vue"),
     meta: {
       sideNav: true
     }
@@ -32,8 +38,7 @@ const routes = [
   {
     path: "/schedule",
     name: "Schedule",
-    component: () =>
-      import(/* webpackChunkName: "schedule" */ "../views/schedule/Index.vue"),
+    component: () => import("../views/schedule/Index.vue"),
     meta: {
       sideNav: true
     }
@@ -41,10 +46,7 @@ const routes = [
   {
     path: "/videos",
     name: "Videos",
-    component: () =>
-      import(
-        /* webpackChunkName: "Videos" */ "../views/video-courses/Index.vue"
-      ),
+    component: () => import("../views/video-courses/Index.vue"),
     meta: {
       sideNav: true,
       keepAlive: true
@@ -53,8 +55,7 @@ const routes = [
   {
     path: "/videos/watch/:id",
     name: "WatchVideo",
-    component: () =>
-      import(/* webpackChunkName: "WatchVideo" */ "../views/video/Index.vue"),
+    component: () => import("../views/video/Index.vue"),
     meta: {
       sideNav: false
     }
