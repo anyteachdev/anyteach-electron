@@ -1,5 +1,5 @@
 import log from "electron-log"
-import { app, protocol, BrowserWindow, Menu, ipcMain } from "electron"
+import { app, protocol, BrowserWindow, Menu } from "electron"
 import { createProtocol } from "vue-cli-plugin-electron-builder/lib"
 import { autoUpdater } from "electron-updater"
 
@@ -77,6 +77,13 @@ function createWindow() {
 
   win.on("closed", () => {
     win = null
+  })
+
+  // if the render process crashes, reload the window
+  win.webContents.on("crashed", () => {
+    win.destroy()
+    log.info("crashed")
+    createWindow()
   })
 
   win.on("will-resize", (event, newBounds) => {
