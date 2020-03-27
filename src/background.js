@@ -2,6 +2,12 @@ import log from "electron-log"
 import { app, protocol, BrowserWindow, Menu } from "electron"
 import { createProtocol } from "vue-cli-plugin-electron-builder/lib"
 import { autoUpdater } from "electron-updater"
+const Sentry = require("@sentry/electron")
+import { init } from "@sentry/electron/dist/main"
+
+init({
+  dsn: "https://d1d884b0010346ba998205fc6d0f5f22@sentry.io/5177112"
+})
 
 const isDevelopment = process.env.NODE_ENV !== "production"
 const isProduction = process.env.VUE_APP_MODE === "production"
@@ -83,6 +89,7 @@ function createWindow() {
   win.webContents.on("crashed", () => {
     win.destroy()
     log.info("crashed")
+    Sentry.captureMessage("renderer window crashed")
     createWindow()
   })
 

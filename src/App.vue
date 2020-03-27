@@ -22,6 +22,7 @@ import TopNav from "@/components/TopNav"
 import SideNav from "@/components/SideNav"
 import Offline from "@/components/Offline"
 import Reload from "@/components/Reload"
+import * as Sentry from "@sentry/electron"
 
 export default {
   name: "App",
@@ -72,6 +73,10 @@ export default {
     }
   },
   created() {
+    Sentry.init({
+      dsn: "https://d1d884b0010346ba998205fc6d0f5f22@sentry.io/5177112"
+    })
+
     this.$router.afterEach(to => {
       if (this.routeIndex <= 0) {
         return this.$store.commit("next", to)
