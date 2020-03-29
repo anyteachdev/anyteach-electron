@@ -2,7 +2,7 @@ import log from "electron-log"
 import { app, protocol, BrowserWindow, Menu } from "electron"
 import { createProtocol } from "vue-cli-plugin-electron-builder/lib"
 import { autoUpdater } from "electron-updater"
-const Sentry = require("@sentry/electron")
+import * as Sentry from "@sentry/electron"
 import { init } from "@sentry/electron/dist/main"
 
 init({
@@ -15,6 +15,10 @@ const isMac = process.platform === "darwin"
 
 autoUpdater.logger = log
 autoUpdater.logger.transports.file.level = "info"
+
+process.on("uncaughtException", function(err) {
+  Sentry.captureException(err)
+})
 
 function sendStatusToWindow(text) {
   log.info(text)

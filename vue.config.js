@@ -10,7 +10,7 @@ module.exports = {
           sign: false
         },
         mac: {
-          target: "dmg",
+          target: ["dmg", "zip"],
           publish: [
             {
               provider: "generic",

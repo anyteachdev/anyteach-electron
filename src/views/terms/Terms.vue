@@ -3,7 +3,6 @@
     <div class="container" v-loading="!data" v-html="data" />
     <div v-if="buttons" class="buttons">
       <el-button @click="$emit('agree', true)" type="primary" round class="button">同意协议</el-button>
-      <!-- <el-link :underline="false" @click="logout()" class="link">不同意，退出登陆</el-link> -->
     </div>
   </div>
 </template>
