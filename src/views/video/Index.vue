@@ -9,9 +9,10 @@
     />
     <div class="top" ref="top">
       <div id="player-wrapper" :style="getPlayerStyle()" v-loading="playInfo === undefined">
-        <div id="player" :style="getPlayerStyle()"></div>
-        <Watermark v-if="player" />
-        <Error v-if="error" @retry="init" title="无法播放" :code="error.code" :msg="error.msg" />
+        <div id="player" :style="getPlayerStyle()">
+          <Watermark v-if="player" />
+          <Error v-if="error" @retry="init" title="无法播放" :code="error.code" :msg="error.msg" />
+        </div>
       </div>
       <div class="related" v-if="data">
         <div class="unit" v-for="unit in data.unit" :key="unit.id">
@@ -224,7 +225,6 @@ export default {
           this.shouldWake = false
         })
       })
-
     }
   },
 }
@@ -351,5 +351,10 @@ export default {
 .prism-player .prism-liveshift-progress .prism-progress-played,
 .prism-player .prism-progress .prism-progress-played {
   background: $color-primary;
+}
+.prism-controlbar {
+  background: rgba(24, 15, 15, 0.6);
+  z-index: 100001;
+  backdrop-filter: blur(5px);
 }
 </style>
