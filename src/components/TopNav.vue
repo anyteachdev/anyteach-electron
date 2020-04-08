@@ -10,6 +10,9 @@
       <div class="item" :class="{ disabled : $route.path === '/' }" @click="home">
         <i class="anyteachicon anyteach-home" />
       </div>
+      <div class="item" v-if="isDevtools" @click="openDevtools">
+        <i class="el-icon-info" />
+      </div>
     </div>
     <el-dropdown>
       <span class="el-dropdown-link">
@@ -36,6 +39,10 @@ export default {
     },
     canNext() {
       return this.$store.state.routeIndex < this.$store.state.history.length - 1
+    },
+    isDevtools() {
+      // TODO: 条件为已登录并且当前用户存在于 electron_debug_users 列表里
+      return this.$store.state.login
     }
   },
   methods: {
@@ -46,6 +53,12 @@ export default {
       background-size: cover;
       background-position: center center;
       `
+    },
+    async getDebugUsers() {
+      // TODO: 用 this.$api.api.CUSTOM 获取 electron_debug_users
+    },
+    openDevtools() {
+      // TODO: 使用 electron 进程间的通讯，让主进程打开 devtools
     },
     back() {
       if (this.canBack) {
@@ -87,16 +100,15 @@ export default {
   -webkit-user-select: none;
 
   .buttons {
-    // background: #eee;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    width: 100px;
     .item {
       cursor: pointer;
       color: $color-primary;
       display: inline-block;
       $size: 30px;
+      margin-right: 5px;
       width: $size;
       height: $size;
       border-radius: $size;
