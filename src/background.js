@@ -63,7 +63,6 @@ function createWindow() {
     height: 700,
     minWidth: 1000,
     minHeight: 600 + 22,
-    // backgroundColor: "#e6e6e6",
     webPreferences: {
       nodeIntegration: true
     },
@@ -100,6 +99,9 @@ function createWindow() {
   win.on("will-resize", (event, newBounds) => {
     win.webContents.send("will-resize", newBounds)
   })
+  global.sharedObject = {
+    win
+  }
 }
 
 const template = [
