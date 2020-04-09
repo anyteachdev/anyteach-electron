@@ -33,6 +33,11 @@
 <script>
 
 export default {
+  data() {
+    return {
+      debugUsers: []
+    }
+  },
   computed: {
     canBack() {
       return this.$store.state.routeIndex < this.$store.state.history.length && this.$store.state.routeIndex > 0
@@ -40,9 +45,11 @@ export default {
     canNext() {
       return this.$store.state.routeIndex < this.$store.state.history.length - 1
     },
+    user() {
+      return this.$store.state.user
+    },
     isDevtools() {
-      // TODO: 条件为已登录并且当前用户存在于 electron_debug_users 列表里
-      return this.$store.state.login
+      return this.$store.state.login && this.debugUsers.includes(this.user.user_id)
     }
   },
   methods: {
@@ -55,10 +62,11 @@ export default {
       `
     },
     async getDebugUsers() {
-      // TODO: 用 this.$api.api.CUSTOM 获取 electron_debug_users
+      const { value_1 } = await this.$api.api.CUSTOM("electron_debug_users")
+      this.debugUsers = JSON.parse(value_1)
     },
     openDevtools() {
-      // TODO: 使用 electron 进程间的通讯，让主进程打开 devtools
+      require("electron").remote.getGlobal("sharedObject").win.webContents.openDevTools()
     },
     back() {
       if (this.canBack) {
@@ -81,6 +89,9 @@ export default {
         this.$store.dispatch("logout")
       }).catch(() => { })
     }
+  },
+  created() {
+    this.getDebugUsers()
   }
 }
 </script>
