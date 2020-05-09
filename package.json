@@ -2,7 +2,7 @@
   "name": "anyteach-electron",
   "author": "陈准 Keith Chen",
   "description": "AnyTeach 的桌面端软件",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
@@ -46,6 +46,7 @@
     "babel-eslint": "^10.0.3",
     "dotenv": "^8.2.0",
     "electron": "^8.0.3",
+    "electron-builder": "^22.2.0",
     "electron-notarize": "^0.2.1",
     "electron-updater": "^4.2.5",
     "eslint": "^6.7.2",

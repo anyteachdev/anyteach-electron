@@ -9,9 +9,9 @@
       </el-aside>
       <el-main :class="{ 'no-padding' : !$route.meta.sideNav }">
         <keep-alive>
-          <router-view v-if="$route.meta.keepAlive" />
+          <router-view :key="$route.fullPath" v-if="$route.meta.keepAlive" />
         </keep-alive>
-        <router-view v-if="!$route.meta.keepAlive" />
+        <router-view :key="$route.fullPath" v-if="!$route.meta.keepAlive" />
       </el-main>
     </el-container>
   </div>

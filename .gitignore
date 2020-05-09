@@ -26,3 +26,5 @@ yarn-error.log*
 # Sentry
 sentry.properties
 sentry-symbols.js
+
+notarize.sh
