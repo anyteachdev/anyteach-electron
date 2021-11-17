@@ -1,5 +1,8 @@
 <template>
-  <div id="video-courses" v-loading="data === undefined && $store.state.user.user_id">
+  <div
+    id="video-courses"
+    v-loading="data === undefined && $store.state.user.user_id"
+  >
     <div class="empty" v-if="data && !data.length">
       <div>
         <h1>暂无视频课</h1>
@@ -21,7 +24,10 @@
           </div>
         </div>
         <h2>{{ item.title }}</h2>
-        <h3>{{ item.unit.reduce((total, current) => total + current.lesson.length, 0) }} 个视频</h3>
+        <h3>
+          {{ item.lesson.length }}
+          个视频
+        </h3>
       </div>
     </div>
   </div>
@@ -42,8 +48,10 @@ export default {
   },
   methods: {
     toVideo(item) {
-      const lesson = item.unit[0].lesson[0]
-      this.$router.push("/videos/watch/" + lesson.id)
+      // const lesson = item.last_video
+      this.$router.push({
+        path: "/videos/watch/" + item.id
+      })
     },
     async getClasses() {
       this.data = await this.$api.video.CLASSES()
@@ -52,15 +60,15 @@ export default {
     onResize() {
       const items = [...document.getElementsByClassName("course-item")]
       if (!items.length) return
-      this.$refs.item.forEach(i => {
+      this.$refs.item.forEach((i) => {
         const totalWidth = this.$refs.wrapper.clientWidth
         const width = totalWidth * 0.25 - 11.25
         i.style.width = width + "px"
       })
-      this.$refs.img.forEach(i => {
+      this.$refs.img.forEach((i) => {
         const totalWidth = this.$refs.wrapper.clientWidth
         const width = totalWidth * 0.25 - 11.25
-        const height = width * 10 / 16
+        const height = (width * 10) / 16
         i.style.width = width + "px"
         i.style.height = height + "px"
       })

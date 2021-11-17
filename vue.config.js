@@ -1,4 +1,9 @@
+
 module.exports = {
+  devServer: {
+    // proxy: 'localhost:3000'
+    port:"3000",
+  },
   pluginOptions: {
     electronBuilder: {
       builderOptions: {

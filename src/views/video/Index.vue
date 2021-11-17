@@ -1,5 +1,8 @@
 <template>
-  <div id="video" v-loading="data === undefined && playInfo === undefined">
+  <div
+    id="video"
+    v-loading="lessonData === undefined && playInfo === undefined"
+  >
     <Wake
       v-if="player"
       :interval="20"
@@ -8,38 +11,52 @@
       @play="player.play()"
     />
     <div class="top" ref="top">
-      <div id="player-wrapper" :style="getPlayerStyle()" v-loading="playInfo === undefined">
+      <div
+        id="player-wrapper"
+        :style="getPlayerStyle()"
+        v-loading="playInfo === undefined"
+      >
         <div id="player" :style="getPlayerStyle()">
           <Watermark v-if="player" />
-          <Error v-if="error" @retry="init" title="无法播放" :code="error.code" :msg="error.msg" />
+          <Error
+            v-if="error"
+            @retry="init"
+            title="无法播放"
+            :code="error.code"
+            :msg="error.msg"
+          />
         </div>
       </div>
-      <div class="related" v-if="data">
-        <div class="unit" v-for="unit in data.unit" :key="unit.id">
-          <h4 v-if="data.unit.length > 1">{{ unit.title }}</h4>
+      <div class="related" v-if="lessonData">
+        <div class="unit">
+          <h4 v-if="lessonData[0].lesson.length > 1">
+            {{ lessonData[0].title }}
+          </h4>
           <div class="lesson-wrapper">
             <div
               tag="div"
               class="item"
               @click="toVideo(lesson.id)"
-              v-for="lesson in unit.lesson"
-              :class="{ active : lesson.id.toString() === $route.params.id }"
+              v-for="lesson in lessonData[0].lesson"
+              :class="{ active: lesson.id.toString() === activeId.toString() }"
               :key="lesson.id"
             >
               <i
-                v-if="lesson.id.toString() === $route.params.id"
+                v-if="lesson.id.toString() === activeId.toString()"
                 class="anyteachicon anyteach-play1"
               />
-              <span>{{ lesson.sort }}</span>
+              <span>{{ lesson.sort || 0 }}</span>
             </div>
           </div>
         </div>
       </div>
     </div>
-    <div class="info" v-if="data">
+    <div class="info" v-if="lessonData && lesson">
       <h2>
-        {{ data.title }}
-        <span v-if="playInfo && data.unit.length > 1">· {{ playInfo.unit.title }}</span>
+        {{ lessonData[0].title }}
+        <span v-if="playInfo && lessonData[0].length > 1"
+          >· {{ playInfo.title }}</span
+        >
       </h2>
       <h1>{{ lesson.title }}</h1>
       <p v-if="lesson.subtitle">{{ lesson.subtitle }}</p>
@@ -62,43 +79,48 @@ export default {
     return {
       player: null,
       shouldWake: false,
-      data: undefined,
+      lessonData: undefined,
       playInfo: undefined,
       error: undefined,
       height: 400,
       width: 711,
+      activeId: undefined
     }
   },
   watch: {
-    socket_id: function (val) {
+    socket_id: function(val) {
       if (val) {
         this.getPlayInfo()
       }
     },
-    $route: function (val) {
-      if (this.player) {
-        this.player.dispose()
-      }
-      this.player = null
-      this.shouldWake = false
-      this.playInfo = undefined
-      this.getPlayInfo()
-      this.getData()
+    $route: function(val) {
+      // if (this.player) {
+      //   this.player.dispose()
+      // }
+      // this.player = null
+      // this.shouldWake = false
+      // this.playInfo = undefined
+      // this.getData()
+      // this.getPlayInfo()
     }
   },
   computed: {
     socket_id() {
       return this.$store.state.socket.id
     },
-    allLessons() {
-      if (!this.data) return null
-      return this.data.unit.map(unit => {
-        return unit.lesson
-      }).flat()
-    },
+    // allLessons() {
+    //   if (!this.data) return null
+    //   return this.data.unit
+    //     .map((unit) => {
+    //       return unit.lesson
+    //     })
+    //     .flat()
+    // },
     lesson() {
-      if (!this.allLessons) return null
-      return this.allLessons.find(i => i.id.toString() === this.$route.params.id)
+      if (!this.lessonData[0].lesson) return null
+      return this.lessonData[0].lesson.find(
+        (i) => i.id.toString() === this.activeId.toString()
+      )
     }
   },
   created() {
@@ -110,39 +132,59 @@ export default {
       this.playInfo = undefined
       this.error = undefined
       this.shouldWake = false
-      if (this.socket_id) {
-        this.getPlayInfo()
-      }
+
       this.getData()
     },
     getPlayerStyle() {
       return `min-width: ${this.width}px; min-height: ${this.height}px; width: ${this.width}px; height: ${this.height}px;`
     },
     toVideo(id) {
+      // lessonid
       if (id.toString() !== this.$route.params.id) {
-        this.$router.push("/videos/watch/" + id)
+        this.activeId = id
+        if (this.player) {
+          this.player.dispose()
+        }
+        this.getPlayInfo()
       }
     },
+    // async getData() {
+    //   this.data = await this.$api.video.LESSONS({
+    //     l_id: this.$route.params.id
+    //   })
+    // },
     async getData() {
-      this.data = await this.$api.video.LESSONS({
-        l_id: this.$route.params.id
-      })
+      const msg = await this.$api.video.CLASSES()
+
+      this.lessonData = msg.filter(
+        (item) => item.id === Number(this.$route.params.id)
+      )
+
+      this.activeId = this.activeId || this.lessonData[0].last_video
+      if (this.activeId === 0) {
+        // 未看过视频，默认播放第一个视频
+        this.activeId = this.lessonData[0].lesson[0].id
+      }
+      if (this.socket_id) {
+        this.getPlayInfo()
+      }
     },
     async getPlayInfo() {
       const { code, msg } = await this.$api.video.PLAY({
         socket_id: this.$store.state.socket.id,
-        l_id: this.$route.params.id
+        l_id: this.activeId
       })
       if (code === "1000") {
-        this.playInfo = msg
+        this.playInfo = msg.play_info[0]
         this.initPlayer()
       } else {
         this.playInfo = null
         this.error = { code, msg }
+        this.init()
       }
     },
     setKeys() {
-      document.onkeydown = event => {
+      document.onkeydown = (event) => {
         if (!event) {
           event = window.event
         }
@@ -182,7 +224,9 @@ export default {
     fullscreen() {
       if (!this.player) return
       const isFullScreen = this.player.fullscreenService.getIsFullScreen()
-      isFullScreen ? this.player.fullscreenService.cancelFullScreen() : this.player.fullscreenService.requestFullScreen()
+      isFullScreen
+        ? this.player.fullscreenService.cancelFullScreen()
+        : this.player.fullscreenService.requestFullScreen()
     },
     volume(up = true) {
       if (!this.player) return
@@ -200,33 +244,39 @@ export default {
     },
     playPause() {
       if (!this.player) return
-      this.player.getStatus() === "playing" ? this.player.pause() : this.player.play()
+      this.player.getStatus() === "playing"
+        ? this.player.pause()
+        : this.player.play()
     },
     initPlayer() {
-      const w = this.playInfo.lesson.width
-      const h = this.playInfo.lesson.height
-      this.width = this.height * w / h
+      const w = this.playInfo.width
+      const h = this.playInfo.height
+      this.width = (this.height * w) / h
       this.$refs.top.style.height = this.height + "px"
-      this.player = new Aliplayer({
-        id: "player",
-        width: this.width + "px",
-        height: this.height + "px",
-        autoplay: true,
-        vid: this.playInfo.lesson.video_id,
-        playauth: this.playInfo.PlayAuth,
-        cover: "",
-        encryptType: 1,
-      }, (player) => {
-        player.on("play", () => {
-          this.shouldWake = true
-        })
+      this.player = new Aliplayer(
+        {
+          id: "player",
+          width: this.width + "px",
+          height: this.height + "px",
+          autoplay: true,
+          // vid: "7607574dc2714c55b4016a81330ca061",
+          source: this.playInfo.PlayURL
+          // playauth:
+          //   "eyJTZWN1cml0eVRva2VuIjoiQ0FJU2h3TjFxNkZ0NUIyeWZTaklyNWJIUEl2Y3ViaFc1S2lxTUJUWnBXTWJWZng2ckpEcGpEejJJSGhKZVhOdkJPMGV0ZjQrbVdCWTdQY1lsck1xRThVVkh4T2NNWllydHNVUHFGdjRKcExGc3QySjZyOEpqc1Y3eHJVa3NWbXBzdlhKYXNEVkVmbDJFNVhFTWlJUi8wMGU2TC8rY2lyWXBUWEhWYlNDbFo5Z2FQa09Rd0M4ZGtBb0xkeEtKd3hrMnQxNFVtWFdPYVNDUHdMU2htUEJMVXhtdldnR2wyUnp1NHV5M3ZPZDVoZlpwMXI4eE80YXhlTDBQb1AyVjgxbExacGxlc3FwM0k0U2M3YmFnaFpVNGdscjhxbHg3c3BCNVN5Vmt0eVdHVWhKL3phTElvaXQ3TnBqZmlCMGVvUUFQb3BGcC9YNmp2QWF3UExVbTliWXhncGhCOFIrWGo3RFpZYXV4N0d6ZW9XVE84MCthS3p3TmxuVXo5bUxMZU9WaVE0L1ptOEJQdzQ0RUxoSWFGMElVRUJ6RUc2Q2QvWDRvZ21hT2xmeUZaTG9pdjltamNCSHFIeno1c2VQS2xTMVJMR1U3RDBWSUpkVWJUbHpiME5MaHpPOEwvZGRLVjBSSXdNOVZ1eVBNYXgzYlFGRHI1M3ZzVGJiWHpaYjBtcHR1UG56ZHp0ZlB4elo3Q09WR29BQnRJbDVPVE5BY3NQVGRMZnEzTUo3MWdQN2Ivay94WTBLNW0rZVp4V3pNeFNsWmRFMFNIUnF1aUd2RldXckRKSnlUM0xKRVBTRGNoQklqNzVuVi9HbmdRTmNVYnBueFAvVDRoNjBBeGRURHlaSzVvYk95WXE1KzdQSTlOMDcrSHVkeGdvb0Zha2lwRFFFUkhCY2hlT2VYdjZFS0dET2M3amJGeEkrR2g4eUZRWT0iLCJBdXRoSW5mbyI6IntcIkNJXCI6XCJiVHpJYTcySkNTeXlsVU1pdHBkUzNjdFJTeVlVWXg3WmJILzRTU0JZZU03aE8xbzZ0aFY3WW0zYnhFdHJXQm5JNUJ2WHZVRlVJVUNpUHYzWHZCUXJFTnA2V0xsN1Ivd0tyREpJOURJbE5aaz1cIixcIkNhbGxlclwiOlwidHN3TWN2aGNoR3cwNGVjSW9nSFRoTjFpMzBoSkwwMzk1NmpDQnRQU21VOD1cIixcIkV4cGlyZVRpbWVcIjpcIjIwMjEtMTEtMTdUMDI6MzY6MDJaXCIsXCJNZWRpYUlkXCI6XCI3NjA3NTc0ZGMyNzE0YzU1YjQwMTZhODEzMzBjYTA2MVwiLFwiUGxheURvbWFpblwiOlwidi5hbnl0ZWFjaC5jblwiLFwiU2lnbmF0dXJlXCI6XCJXeG1JUm5XZDhCRUYycm52MUpMZVp1QUFURmc9XCJ9IiwiVmlkZW9NZXRhIjp7IlN0YXR1cyI6Ik5vcm1hbCIsIlZpZGVvSWQiOiI3NjA3NTc0ZGMyNzE0YzU1YjQwMTZhODEzMzBjYTA2MSIsIlRpdGxlIjoiNDE5NWQyY2YtMTdjMDI3OGVlODIubXA0IiwiQ292ZXJVUkwiOiJodHRwczovL3YuYW55dGVhY2guY24vNzYwNzU3NGRjMjcxNGM1NWI0MDE2YTgxMzMwY2EwNjEvc25hcHNob3RzLzM5OGYxNGZkNmJmYzRmYWU5MjZjNmQ1YWVhYjYxYzhiLTAwMDA1LmpwZyIsIkR1cmF0aW9uIjoxNDcuNjU2fSwiQWNjZXNzS2V5SWQiOiJTVFMuTlVydzFoVGd3U2pBMjJoQWNOWXNWQ1VCbiIsIlBsYXlEb21haW4iOiJ2LmFueXRlYWNoLmNuIiwiQWNjZXNzS2V5U2VjcmV0IjoiOFZwS2RvcWVkcHB3aXR2SE1Zb0YyQ0M3cmd4U1dVUVZ0eEU0VDlqdnFYWmYiLCJSZWdpb24iOiJjbi1zaGFuZ2hhaSIsIkN1c3RvbWVySWQiOjEwMjgyNzA0NTMwOTAxMDF9==", // cover: "",
+          // encryptType: 1
+        },
+        (player) => {
+          player.on("play", () => {
+            this.shouldWake = true
+          })
 
-        player.on("pause", () => {
-          this.shouldWake = false
-        })
-      })
+          player.on("pause", () => {
+            this.shouldWake = false
+          })
+        }
+      )
     }
-  },
+  }
 }
 </script>
 
