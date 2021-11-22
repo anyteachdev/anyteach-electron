@@ -91,7 +91,10 @@ export default {
       height: 400,
       width: 711,
       activeId: undefined,
+      play_id: undefined,
       timer: undefined,
+      vedio_time: 0,
+      sendRecordTimer: undefined,
       unique: undefined
     }
   },
@@ -166,6 +169,10 @@ export default {
     },
     toVideo(id) {
       // lessonid
+      if (id !== this.activeId) {
+        // 点击不是当前视频，初始化vedio_time
+        this.vedio_time = 0
+      }
       if (id.toString() !== this.$route.params.id) {
         this.activeId = id
         if (this.player) {
@@ -202,6 +209,7 @@ export default {
       })
       if (code === "1000") {
         this.playInfo = msg.play_info[0]
+        this.play_id = msg.play_id
         this.initPlayer()
       } else {
         if (code !== "2006") {
@@ -279,6 +287,30 @@ export default {
         ? this.player.pause()
         : this.player.play()
     },
+    sendRecord() {
+      // 每秒钟记录当前视频进度
+      clearInterval(this.sendRecordTimer)
+      this.sendRecordTimer = setInterval(() => {
+        this.vedio_time = this.vedio_time + 1
+        // console.log(
+        //   "time--",
+        //   this.vedio_time,
+        //   "video_time---",
+        //   this.player.getCurrentTime()
+        // )
+        this.$store.dispatch("socket/log", {
+          name: "video_record",
+          url: "",
+          data: {
+            course_id: this.lesson.pid, // 课程 ID
+            lesson_id: this.lesson.id, // 小节 ID
+            play_id: this.play_id, // 后端接口颁发的播放 ID
+            time: this.vedio_time, // 计时器当前秒数，从 0 开始
+            video_time: this.player.getCurrentTime() // 视频播放器当前秒数
+          }
+        })
+      }, 1000)
+    },
     initPlayer() {
       const w = this.playInfo.width
       const h = this.playInfo.height
@@ -296,12 +328,13 @@ export default {
           player.seek(this.lesson.last_position)
           player.on("play", () => {
             this.shouldWake = true
+            console.log("播放")
+            this.sendRecord() // 发送视频进度
             this.$store.state.socket.client.on(
               "video_socket_id_check",
               (data) => {
                 this.unique = data
                 // this.init()
-                console.log("----", this.unique)
                 if (this.unique === false) {
                   if (this.player) {
                     player.pause()
@@ -312,6 +345,7 @@ export default {
           })
 
           player.on("pause", () => {
+            clearInterval(this.sendRecordTimer)
             this.shouldWake = false
             if (this.unique === false) {
               if (this.player) {
@@ -320,6 +354,12 @@ export default {
                 })
               }
             }
+          })
+
+          player.on("ended", () => {
+            console.log("结束")
+            this.vedio_time = 0
+            clearInterval(this.sendRecordTimer)
           })
         }
       )
