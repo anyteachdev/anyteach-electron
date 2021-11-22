@@ -16,6 +16,11 @@
         :style="getPlayerStyle()"
         v-loading="playInfo === undefined"
       >
+        <Error
+          v-if="unique === false"
+          @retry="uniqueInit"
+          title="您的账号已在别的设备登陆"
+        />
         <div id="player" :style="getPlayerStyle()">
           <Watermark v-if="player" />
           <Error
@@ -68,6 +73,7 @@
 import Wake from "@/components/Wake"
 import Watermark from "./Watermark"
 import Error from "./Error"
+import { setTimeout } from "timers"
 export default {
   name: "Video",
   components: {
@@ -84,7 +90,9 @@ export default {
       error: undefined,
       height: 400,
       width: 711,
-      activeId: undefined
+      activeId: undefined,
+      timer: undefined,
+      unique: undefined
     }
   },
   watch: {
@@ -117,7 +125,7 @@ export default {
     //     .flat()
     // },
     lesson() {
-      if (!this.lessonData[0].lesson) return null
+      if (this.lessonData[0] && !this.lessonData[0].lesson) return null
       return this.lessonData[0].lesson.find(
         (i) => i.id.toString() === this.activeId.toString()
       )
@@ -127,13 +135,31 @@ export default {
     this.setKeys()
     this.init()
   },
+  mounted() {},
   methods: {
     init() {
       this.playInfo = undefined
       this.error = undefined
       this.shouldWake = false
-
+      this.getTimer()
       this.getData()
+    },
+    uniqueInit() {
+      this.playInfo = undefined
+      this.unique = undefined
+      this.lessonData = undefined
+      this.getTimer()
+      this.getData()
+    },
+    getTimer() {
+      this.timer && clearInterval(this.timer)
+      this.timer = setInterval(() => {
+        this.$store.dispatch("socket/log", {
+          name: "video_socket_id_check",
+          url: "",
+          data: ""
+        })
+      }, 5000)
     },
     getPlayerStyle() {
       return `min-width: ${this.width}px; min-height: ${this.height}px; width: ${this.width}px; height: ${this.height}px;`
@@ -178,9 +204,14 @@ export default {
         this.playInfo = msg.play_info[0]
         this.initPlayer()
       } else {
-        this.playInfo = null
-        this.error = { code, msg }
-        this.init()
+        if (code !== "2006") {
+          this.playInfo = null
+          this.error = { code, msg }
+          this.init()
+        } else {
+          this.unique = false
+          this.playInfo = {}
+        }
       }
     },
     setKeys() {
@@ -262,16 +293,40 @@ export default {
           source: this.playInfo.PlayURL
         },
         (player) => {
+          player.seek(this.lesson.last_position)
           player.on("play", () => {
             this.shouldWake = true
+            this.$store.state.socket.client.on(
+              "video_socket_id_check",
+              (data) => {
+                this.unique = data
+                // this.init()
+                console.log("----", this.unique)
+                if (this.unique === false) {
+                  if (this.player) {
+                    player.pause()
+                  }
+                }
+              }
+            )
           })
 
           player.on("pause", () => {
             this.shouldWake = false
+            if (this.unique === false) {
+              if (this.player) {
+                setTimeout(() => {
+                  this.player.dispose()
+                })
+              }
+            }
           })
         }
       )
     }
+  },
+  destroyed() {
+    this.timer && clearInterval(this.timer)
   }
 }
 </script>
