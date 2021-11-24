@@ -1,3 +1,4 @@
+
 import axios from "axios"
 import { PHP_API } from "./config"
 
@@ -35,6 +36,20 @@ export default {
         url,
         method: "GET",
         params: { socket_id, l_id }
+      }
+      const { data } = await axios(config)
+      return data
+    } catch (err) {
+      throw new Error(err)
+    }
+  },
+  COMPLETE: async function({ play_id }) {
+    const url = PHP_API + "/video/courses/complete"
+    try {
+      const config = {
+        url,
+        method: "GET",
+        params: { play_id }
       }
       const { data } = await axios(config)
       return data

@@ -24,10 +24,19 @@
           </div>
         </div>
         <h2>{{ item.title }}</h2>
-        <h3>
-          {{ item.lesson.length }}
-          个视频
-        </h3>
+        <div class="c-footer">
+          <h3>
+            {{ item.lesson.length }}
+            个视频
+          </h3>
+          <!-- 进度条 -->
+          <el-progress
+            type="circle"
+            :show-text="false"
+            :percentage="item.perc * 100"
+            status="exception"
+          ></el-progress>
+        </div>
       </div>
     </div>
   </div>
@@ -55,6 +64,13 @@ export default {
     },
     async getClasses() {
       this.data = await this.$api.video.CLASSES()
+      this.data.map((item) => {
+        let perc = 0
+        item.lesson.map((lesson) => {
+          perc = perc + lesson.last_position / JSON.parse(lesson.duration)
+        })
+        item.perc = perc / item.lesson.length
+      })
       this.$nextTick(() => this.onResize())
     },
     onResize() {
@@ -82,6 +98,12 @@ export default {
   }
 }
 </script>
+<style>
+#video-courses .el-progress-circle {
+  width: 20px !important;
+  height: 20px !important;
+}
+</style>
 
 <style scoped lang="scss">
 @import "../../styles/common.scss";
@@ -106,6 +128,10 @@ export default {
     cursor: pointer;
     -webkit-user-select: none;
     display: inline-block;
+    .c-footer {
+      display: flex;
+      justify-content: space-between;
+    }
     h2 {
       margin: 0;
       padding: 0;
