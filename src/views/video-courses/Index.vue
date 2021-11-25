@@ -1,5 +1,8 @@
 <template>
-  <div id="video-courses" v-loading="data === undefined && $store.state.user.user_id">
+  <div
+    id="video-courses"
+    v-loading="data === undefined && $store.state.user.user_id"
+  >
     <div class="empty" v-if="data && !data.length">
       <div>
         <h1>暂无视频课</h1>
@@ -21,7 +24,19 @@
           </div>
         </div>
         <h2>{{ item.title }}</h2>
-        <h3>{{ item.unit.reduce((total, current) => total + current.lesson.length, 0) }} 个视频</h3>
+        <div class="c-footer">
+          <h3>
+            {{ item.lesson.length }}
+            个视频
+          </h3>
+          <!-- 进度条 -->
+          <el-progress
+            type="circle"
+            :show-text="false"
+            :percentage="item.perc * 100"
+            status="exception"
+          ></el-progress>
+        </div>
       </div>
     </div>
   </div>
@@ -42,25 +57,34 @@ export default {
   },
   methods: {
     toVideo(item) {
-      const lesson = item.unit[0].lesson[0]
-      this.$router.push("/videos/watch/" + lesson.id)
+      // const lesson = item.last_video
+      this.$router.push({
+        path: "/videos/watch/" + item.id
+      })
     },
     async getClasses() {
       this.data = await this.$api.video.CLASSES()
+      this.data.map((item) => {
+        let perc = 0
+        item.lesson.map((lesson) => {
+          perc = perc + lesson.last_position / JSON.parse(lesson.duration)
+        })
+        item.perc = perc / item.lesson.length
+      })
       this.$nextTick(() => this.onResize())
     },
     onResize() {
       const items = [...document.getElementsByClassName("course-item")]
       if (!items.length) return
-      this.$refs.item.forEach(i => {
+      this.$refs.item.forEach((i) => {
         const totalWidth = this.$refs.wrapper.clientWidth
         const width = totalWidth * 0.25 - 11.25
         i.style.width = width + "px"
       })
-      this.$refs.img.forEach(i => {
+      this.$refs.img.forEach((i) => {
         const totalWidth = this.$refs.wrapper.clientWidth
         const width = totalWidth * 0.25 - 11.25
-        const height = width * 10 / 16
+        const height = (width * 10) / 16
         i.style.width = width + "px"
         i.style.height = height + "px"
       })
@@ -74,6 +98,12 @@ export default {
   }
 }
 </script>
+<style>
+#video-courses .el-progress-circle {
+  width: 20px !important;
+  height: 20px !important;
+}
+</style>
 
 <style scoped lang="scss">
 @import "../../styles/common.scss";
@@ -98,6 +128,10 @@ export default {
     cursor: pointer;
     -webkit-user-select: none;
     display: inline-block;
+    .c-footer {
+      display: flex;
+      justify-content: space-between;
+    }
     h2 {
       margin: 0;
       padding: 0;

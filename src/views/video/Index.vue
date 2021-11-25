@@ -1,5 +1,8 @@
 <template>
-  <div id="video" v-loading="data === undefined && playInfo === undefined">
+  <div
+    id="video"
+    v-loading="lessonData === undefined && playInfo === undefined"
+  >
     <Wake
       v-if="player"
       :interval="20"
@@ -8,38 +11,98 @@
       @play="player.play()"
     />
     <div class="top" ref="top">
-      <div id="player-wrapper" :style="getPlayerStyle()" v-loading="playInfo === undefined">
+      <div
+        id="player-wrapper"
+        :style="getPlayerStyle()"
+        v-loading="playInfo === undefined"
+      >
+        <Error
+          v-if="unique === false"
+          @retry="uniqueInit"
+          title="您的账号已在别的设备登陆"
+        />
         <div id="player" :style="getPlayerStyle()">
           <Watermark v-if="player" />
-          <Error v-if="error" @retry="init" title="无法播放" :code="error.code" :msg="error.msg" />
+          <Error
+            v-if="error"
+            @retry="init"
+            title="无法播放"
+            :code="error.code"
+            :msg="error.msg"
+          />
         </div>
       </div>
-      <div class="related" v-if="data">
-        <div class="unit" v-for="unit in data.unit" :key="unit.id">
-          <h4 v-if="data.unit.length > 1">{{ unit.title }}</h4>
-          <div class="lesson-wrapper">
+      <div class="related" v-if="lessonData">
+        <div class="unit">
+          <!-- <h4 v-if="lessonData[0].lesson.length > 1">
+            {{ lessonData[0].title }}
+          </h4> -->
+          <div class="lesson-wrapper" :style="getLessonStyle()">
             <div
+              class="lesson-item"
+              @click="toVideo(item.id)"
+              v-for="item in lessonData[0].lesson"
+              :key="item.id"
+              :class="{
+                'lesson-item-active': item.id.toString() === activeId.toString()
+              }"
+            >
+              <div class="ell">
+                <span class="sort">{{ item.sort || 0 }}</span>
+                <span>{{ item.title }}</span>
+              </div>
+
+              <i
+                v-if="
+                  item.is_complete !== 1 &&
+                    item.id.toString() === activeId.toString()
+                "
+                class="anyteachicon anyteach-zhengzaibofang"
+              />
+              <!-- 进度条 -->
+              <el-progress
+                v-if="
+                  item.is_complete !== 1 &&
+                    item.id.toString() !== activeId.toString() &&
+                    item.last_position.toString() !== '0'
+                "
+                type="circle"
+                :show-text="false"
+                :percentage="
+                  (Number(item.last_position) * 100) / Number(item.duration)
+                "
+                status="exception"
+              ></el-progress>
+              <!-- 已播放完成 -->
+              <i
+                class="anyteachicon anyteach-check"
+                v-if="item.is_complete === 1"
+              />
+            </div>
+            <!-- <div
               tag="div"
               class="item"
               @click="toVideo(lesson.id)"
-              v-for="lesson in unit.lesson"
-              :class="{ active : lesson.id.toString() === $route.params.id }"
+              v-for="lesson in lessonData[0].lesson"
+              :class="{ active: lesson.id.toString() === activeId.toString() }"
               :key="lesson.id"
             >
               <i
-                v-if="lesson.id.toString() === $route.params.id"
+                v-if="lesson.id.toString() === activeId.toString()"
                 class="anyteachicon anyteach-play1"
               />
-              <span>{{ lesson.sort }}</span>
-            </div>
+              <span>{{ lesson.sort || 0 }}</span>
+            </div> -->
           </div>
         </div>
       </div>
     </div>
-    <div class="info" v-if="data">
+    <div class="info" v-if="lessonData && lesson">
       <h2>
-        {{ data.title }}
-        <span v-if="playInfo && data.unit.length > 1">· {{ playInfo.unit.title }}</span>
+        {{ lessonData[0].title }}
+        <span v-if="playInfo && lessonData[0].length > 1"
+          >· {{ playInfo.title }}</span
+        >
       </h2>
       <h1>{{ lesson.title }}</h1>
       <p v-if="lesson.subtitle">{{ lesson.subtitle }}</p>
@@ -51,6 +114,7 @@
 import Wake from "@/components/Wake"
 import Watermark from "./Watermark"
 import Error from "./Error"
+import { setTimeout } from "timers"
 export default {
   name: "Video",
   components: {
@@ -62,87 +126,156 @@ export default {
     return {
       player: null,
       shouldWake: false,
-      data: undefined,
+      lessonData: undefined,
       playInfo: undefined,
       error: undefined,
       height: 400,
       width: 711,
+      activeId: undefined,
+      play_id: undefined,
+      timer: undefined,
+      vedio_time: 0,
+      sendRecordTimer: undefined,
+      unique: undefined
     }
   },
   watch: {
-    socket_id: function (val) {
+    socket_id: function(val) {
       if (val) {
         this.getPlayInfo()
       }
     },
-    $route: function (val) {
-      if (this.player) {
-        this.player.dispose()
-      }
-      this.player = null
-      this.shouldWake = false
-      this.playInfo = undefined
-      this.getPlayInfo()
-      this.getData()
+    $route: function(val) {
+      // if (this.player) {
+      //   this.player.dispose()
+      // }
+      // this.player = null
+      // this.shouldWake = false
+      // this.playInfo = undefined
+      // this.getData()
+      // this.getPlayInfo()
     }
   },
   computed: {
     socket_id() {
       return this.$store.state.socket.id
     },
-    allLessons() {
-      if (!this.data) return null
-      return this.data.unit.map(unit => {
-        return unit.lesson
-      }).flat()
-    },
+    // allLessons() {
+    //   if (!this.data) return null
+    //   return this.data.unit
+    //     .map((unit) => {
+    //       return unit.lesson
+    //     })
+    //     .flat()
+    // },
     lesson() {
-      if (!this.allLessons) return null
-      return this.allLessons.find(i => i.id.toString() === this.$route.params.id)
+      if (this.lessonData[0] && !this.lessonData[0].lesson) return null
+      return this.lessonData[0].lesson.find(
+        (i) => i.id.toString() === this.activeId.toString()
+      )
     }
   },
   created() {
     this.setKeys()
     this.init()
   },
+  mounted() {},
   methods: {
     init() {
       this.playInfo = undefined
       this.error = undefined
       this.shouldWake = false
-      if (this.socket_id) {
-        this.getPlayInfo()
-      }
+      this.getTimer()
       this.getData()
+    },
+    uniqueInit() {
+      this.playInfo = undefined
+      this.unique = undefined
+      this.lessonData = undefined
+      this.getTimer()
+      this.getData()
+    },
+    getTimer() {
+      this.timer && clearInterval(this.timer)
+      this.timer = setInterval(() => {
+        this.$store.dispatch("socket/log", {
+          name: "video_socket_id_check",
+          url: "",
+          data: ""
+        })
+      }, 5000)
     },
     getPlayerStyle() {
       return `min-width: ${this.width}px; min-height: ${this.height}px; width: ${this.width}px; height: ${this.height}px;`
     },
-    toVideo(id) {
-      if (id.toString() !== this.$route.params.id) {
-        this.$router.push("/videos/watch/" + id)
+    getLessonStyle() {
+      return `min-height: ${this.height - 50}px;height: ${this.height - 50}px;`
+    },
+    async toVideo(id) {
+      // lessonid
+      if (id !== this.activeId) {
+        // 点击不是当前视频，初始化vedio_time
+        this.vedio_time = 0
+
+        if (id.toString() !== this.$route.params.id) {
+          this.activeId = id
+          if (this.player) {
+            await this.player.dispose()
+          }
+
+          this.getPlayInfo()
+          this.lessonData[0].last_video = id // 更新本地数据当前小节视频id
+        }
       }
     },
-    async getData() {
-      this.data = await this.$api.video.LESSONS({
-        l_id: this.$route.params.id
+    // async getData() {
+    //   this.data = await this.$api.video.LESSONS({
+    //     l_id: this.$route.params.id
+    //   })
+    // },
+    async updateStatus() {
+      await this.$api.video.COMPLETE({
+        play_id: this.play_id
       })
+    },
+    async getData() {
+      const msg = await this.$api.video.CLASSES()
+
+      this.lessonData = msg.filter(
+        (item) => item.id === Number(this.$route.params.id)
+      )
+
+      this.activeId = this.activeId || this.lessonData[0].last_video
+      if (this.activeId === 0) {
+        // 未看过视频，默认播放第一个视频
+        this.activeId = this.lessonData[0].lesson[0].id
+      }
+      if (this.socket_id) {
+        this.getPlayInfo()
+      }
     },
     async getPlayInfo() {
       const { code, msg } = await this.$api.video.PLAY({
         socket_id: this.$store.state.socket.id,
-        l_id: this.$route.params.id
+        l_id: this.activeId
       })
       if (code === "1000") {
-        this.playInfo = msg
+        this.playInfo = msg.play_info[0]
+        this.play_id = msg.play_id
         this.initPlayer()
       } else {
-        this.playInfo = null
-        this.error = { code, msg }
+        if (code !== "2006") {
+          this.playInfo = null
+          this.error = { code, msg }
+          this.init()
+        } else {
+          this.unique = false
+          this.playInfo = {}
+        }
       }
     },
     setKeys() {
-      document.onkeydown = event => {
+      document.onkeydown = (event) => {
         if (!event) {
           event = window.event
         }
@@ -182,7 +315,9 @@ export default {
     fullscreen() {
       if (!this.player) return
       const isFullScreen = this.player.fullscreenService.getIsFullScreen()
-      isFullScreen ? this.player.fullscreenService.cancelFullScreen() : this.player.fullscreenService.requestFullScreen()
+      isFullScreen
+        ? this.player.fullscreenService.cancelFullScreen()
+        : this.player.fullscreenService.requestFullScreen()
     },
     volume(up = true) {
       if (!this.player) return
@@ -200,35 +335,131 @@ export default {
     },
     playPause() {
       if (!this.player) return
-      this.player.getStatus() === "playing" ? this.player.pause() : this.player.play()
+      this.player.getStatus() === "playing"
+        ? this.player.pause()
+        : this.player.play()
     },
-    initPlayer() {
-      const w = this.playInfo.lesson.width
-      const h = this.playInfo.lesson.height
-      this.width = this.height * w / h
-      this.$refs.top.style.height = this.height + "px"
-      this.player = new Aliplayer({
-        id: "player",
-        width: this.width + "px",
-        height: this.height + "px",
-        autoplay: true,
-        vid: this.playInfo.lesson.video_id,
-        playauth: this.playInfo.PlayAuth,
-        cover: "",
-        encryptType: 1,
-      }, (player) => {
-        player.on("play", () => {
-          this.shouldWake = true
-        })
+    sendRecord() {
+      // 每秒钟记录当前视频进度
+      clearInterval(this.sendRecordTimer)
+      this.sendRecordTimer = setInterval(() => {
+        this.vedio_time = this.vedio_time + 1
 
-        player.on("pause", () => {
-          this.shouldWake = false
+        this.$store.dispatch("socket/log", {
+          name: "video_record",
+          url: "",
+          data: {
+            course_id: this.lesson.pid, // 课程 ID
+            lesson_id: this.lesson.id, // 小节 ID
+            play_id: this.play_id, // 后端接口颁发的播放 ID
+            time: this.vedio_time, // 计时器当前秒数，从 0 开始
+            video_time: this.player.getCurrentTime() // 视频播放器当前秒数
+          }
         })
-      })
+        //实时更新 last_position 字段
+        this.lessonData[0].lesson.map((item) => {
+          if (item.id.toString() === this.activeId.toString()) {
+            // 当前小节，更新数据
+            item.last_position = this.player.getCurrentTime()
+            if (JSON.parse(item.duration) - this.player.getCurrentTime() < 10) {
+              this.updateStatus()
+            }
+          }
+          return item
+        })
+      }, 1000)
+    },
+    async initPlayer() {
+      const w = this.playInfo.width
+      const h = this.playInfo.height
+      this.width = (this.height * w) / h
+      this.$refs.top.style.height = this.height + "px"
+      this.player = new Aliplayer(
+        {
+          id: "player",
+          width: this.width + "px",
+          height: this.height + "px",
+          autoplay: true,
+          source: this.playInfo.PlayURL
+        },
+        (player) => {
+          player.on("timeupdate", (data) => {})
+          player.on("play", () => {
+            let last_position = undefined
+            this.lessonData[0].lesson.map((item) => {
+              // console.log("item---", item.last_position)
+              if (item.id.toString() === this.activeId.toString()) {
+                // 当前小节，更新数据
+                last_position = parseInt(item.last_position)
+                last_position = item.last_position
+
+                last_position && player.seek(last_position)
+
+                this.shouldWake = true
+                setTimeout(() => {
+                  this.sendRecord() // 发送视频进度
+                }, 1000)
+              }
+            })
+            // console.log("当前播放位置11--", last_position)
+            // last_position && player.seek(last_position)
+            // this.shouldWake = true
+            // this.sendRecord() // 发送视频进度
+            this.$store.state.socket.client.on(
+              "video_socket_id_check",
+              (data) => {
+                this.unique = data
+                if (this.unique === false) {
+                  if (this.player) {
+                    player.pause()
+                  }
+                }
+              }
+            )
+          })
+
+          player.on("pause", () => {
+            clearInterval(this.sendRecordTimer)
+            this.shouldWake = false
+            if (this.unique === false) {
+              if (this.player) {
+                setTimeout(() => {
+                  this.player.dispose()
+                })
+              }
+            }
+          })
+
+          player.on("ended", () => {
+            console.log("结束")
+            this.updateStatus()
+            this.vedio_time = 0
+            clearInterval(this.sendRecordTimer)
+            //视频播放结束，更新 is_complete 字段
+            this.lessonData[0].lesson.map((item) => {
+              if (item.id.toString() === this.activeId.toString()) {
+                // 当前小节，更新数据
+                item.is_complete = 1
+                item.last_position = 0
+              }
+              return item
+            })
+          })
+        }
+      )
     }
   },
+  destroyed() {
+    this.timer && clearInterval(this.timer)
+  }
 }
 </script>
+<style>
+#video .el-progress-circle {
+  width: 20px !important;
+  height: 20px !important;
+}
+</style>
 
 <style lang="scss" scoped>
 @import url(https://g.alicdn.com/de/prismplayer/2.8.2/skins/default/aliplayer-min.css);
@@ -270,9 +501,39 @@ export default {
         margin: 0;
       }
     }
+    .ell {
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
     .lesson-wrapper {
       display: flex;
       flex-wrap: wrap;
+      font-size: 12px;
+      .lesson-item {
+        display: flex;
+        justify-content: space-between;
+        color: #292929;
+        background-color: #f2f2ff;
+        width: 100%;
+        margin-bottom: 10px;
+        padding: 8px 10px;
+        border-radius: 5px;
+        cursor: pointer;
+        .sort {
+          margin-right: 8px;
+          color: #666;
+        }
+        i {
+          font-size: 12px;
+          margin-top: 3px;
+          color: $color-primary;
+        }
+      }
+      .lesson-item:hover,
+      .lesson-item-active {
+        border: 2px solid rgba(237, 38, 78, 1);
+      }
     }
     .item {
       cursor: pointer;
@@ -299,26 +560,30 @@ export default {
     }
     .active,
     .active:hover {
-      background: $color-primary;
-      color: $color-bgd;
+      // background: $color-primary;
+      color: $color-primary;
     }
-    .active {
-      span {
-        opacity: 0;
-      }
-      span,
-      i {
-        transition: all 0.3s;
-      }
-      &:hover {
-        span {
-          opacity: 1;
-        }
-        i {
-          opacity: 0;
-        }
-      }
+    .anyteach-zhengzaibofang {
+      transition: all 0.3s;
+      font-weight: bold;
     }
+    // .active {
+    //   span {
+    //     opacity: 0;
+    //   }
+    //   span,
+    //   i {
+    //     transition: all 0.3s;
+    //   }
+    //   &:hover {
+    //     span {
+    //       opacity: 1;
+    //     }
+    //     i {
+    //       opacity: 0;
+    //     }
+    //   }
+    // }
   }
 }
 

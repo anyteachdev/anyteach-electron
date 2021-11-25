@@ -1,9 +1,10 @@
+
 import axios from "axios"
 import { PHP_API } from "./config"
 
 export default {
   CLASSES: async function() {
-    const url = PHP_API + "/video/course/getClass"
+    const url = PHP_API + "/video/courses/all"
     try {
       const { data } = await axios(url)
       const { code, msg } = data
@@ -29,12 +30,26 @@ export default {
     }
   },
   PLAY: async function({ socket_id, l_id }) {
-    const url = PHP_API + "/video/course/getPlayInfo"
+    const url = PHP_API + "/video/courses/play_url"
     try {
       const config = {
         url,
         method: "GET",
         params: { socket_id, l_id }
+      }
+      const { data } = await axios(config)
+      return data
+    } catch (err) {
+      throw new Error(err)
+    }
+  },
+  COMPLETE: async function({ play_id }) {
+    const url = PHP_API + "/video/courses/complete"
+    try {
+      const config = {
+        url,
+        method: "GET",
+        params: { play_id }
       }
       const { data } = await axios(config)
       return data
