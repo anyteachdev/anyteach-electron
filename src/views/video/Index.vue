@@ -1,8 +1,5 @@
 <template>
-  <div
-    id="video"
-    v-loading="lessonData === undefined && playInfo === undefined"
-  >
+  <div id="video" v-loading="data === undefined && playInfo === undefined">
     <Wake
       v-if="player"
       :interval="20"
@@ -18,7 +15,7 @@
       >
         <Error
           v-if="unique === false"
-          @retry="uniqueInit"
+          @retry="init"
           title="您的账号已在别的设备登陆"
         />
         <div id="player" :style="getPlayerStyle()">
@@ -32,77 +29,59 @@
           />
         </div>
       </div>
-      <div class="related" v-if="lessonData">
+      <div class="related" v-if="data">
         <div class="unit">
-          <!-- <h4 v-if="lessonData[0].lesson.length > 1">
-            {{ lessonData[0].title }}
-          </h4> -->
+          <!-- <h4 v-if="data.unit.length > 1">{{ unit.title }}</h4> -->
           <div class="lesson-wrapper" :style="getLessonStyle()">
             <div
+              tag="div"
               class="lesson-item"
-              @click="toVideo(item.id)"
-              v-for="item in lessonData[0].lesson"
-              :key="item.id"
+              @click="toVideo(lesson.id)"
+              v-for="lesson in allLessons"
               :class="{
-                'lesson-item-active': item.id.toString() === activeId.toString()
+                'lesson-item-active': lesson.id.toString() === $route.params.id
               }"
+              :key="lesson.id"
             >
               <div class="ell">
-                <span class="sort">{{ item.sort || 0 }}</span>
-                <span>{{ item.title }}</span>
+                <span class="sort">{{ lesson.sort || 0 }}</span>
+                <span>{{ lesson.title }}</span>
               </div>
 
               <i
                 v-if="
-                  item.is_complete !== 1 &&
-                    item.id.toString() === activeId.toString()
+                  lesson.is_complete !== 1 &&
+                    lesson.id.toString() === $route.params.id
                 "
                 class="anyteachicon anyteach-zhengzaibofang"
               />
               <!-- 进度条 -->
               <el-progress
                 v-if="
-                  item.is_complete !== 1 &&
-                    item.id.toString() !== activeId.toString() &&
-                    item.last_position.toString() !== '0'
+                  lesson.is_complete !== 1 &&
+                    lesson.id.toString() !== $route.params.id &&
+                    lesson.last_position.toString() !== '0'
                 "
                 type="circle"
                 :show-text="false"
                 :percentage="
-                  (Number(item.last_position) * 100) / Number(item.duration)
+                  (Number(lesson.last_position) * 100) / Number(lesson.duration)
                 "
                 status="exception"
               ></el-progress>
               <!-- 已播放完成 -->
               <i
                 class="anyteachicon anyteach-check"
-                v-if="item.is_complete === 1"
+                v-if="lesson.is_complete === 1"
               />
             </div>
-            <!-- <div
-              tag="div"
-              class="item"
-              @click="toVideo(lesson.id)"
-              v-for="lesson in lessonData[0].lesson"
-              :class="{ active: lesson.id.toString() === activeId.toString() }"
-              :key="lesson.id"
-            >
-              <i
-                v-if="lesson.id.toString() === activeId.toString()"
-                class="anyteachicon anyteach-play1"
-              />
-              <span>{{ lesson.sort || 0 }}</span>
-            </div> -->
           </div>
         </div>
       </div>
     </div>
-    <div class="info" v-if="lessonData && lesson">
+    <div class="info" v-if="data">
       <h2>
-        {{ lessonData[0].title }}
-        <span v-if="playInfo && lessonData[0].length > 1"
-          >· {{ playInfo.title }}</span
-        >
+        {{ data.title }}
       </h2>
       <h1>{{ lesson.title }}</h1>
       <p v-if="lesson.subtitle">{{ lesson.subtitle }}</p>
@@ -114,7 +93,6 @@
 import Wake from "@/components/Wake"
 import Watermark from "./Watermark"
 import Error from "./Error"
-import { setTimeout } from "timers"
 export default {
   name: "Video",
   components: {
@@ -126,17 +104,17 @@ export default {
     return {
       player: null,
       shouldWake: false,
-      lessonData: undefined,
+      data: undefined,
       playInfo: undefined,
+      play_id: undefined,
       error: undefined,
       height: 400,
       width: 711,
-      activeId: undefined,
-      play_id: undefined,
       timer: undefined,
-      vedio_time: 0,
       sendRecordTimer: undefined,
-      unique: undefined
+      unique: undefined,
+      time: 0,
+      scrollTop: 0
     }
   },
   watch: {
@@ -146,32 +124,29 @@ export default {
       }
     },
     $route: function(val) {
-      // if (this.player) {
-      //   this.player.dispose()
-      // }
-      // this.player = null
-      // this.shouldWake = false
-      // this.playInfo = undefined
-      // this.getData()
-      // this.getPlayInfo()
+      if (this.player) {
+        this.player.dispose()
+      }
+      this.player = null
+      this.shouldWake = false
+      this.playInfo = undefined
+      this.play_id = undefined
+      this.getPlayInfo()
+      this.getData()
     }
   },
   computed: {
     socket_id() {
       return this.$store.state.socket.id
     },
-    // allLessons() {
-    //   if (!this.data) return null
-    //   return this.data.unit
-    //     .map((unit) => {
-    //       return unit.lesson
-    //     })
-    //     .flat()
-    // },
+    allLessons() {
+      if (!this.data) return null
+      return this.data.lesson
+    },
     lesson() {
-      if (this.lessonData[0] && !this.lessonData[0].lesson) return null
-      return this.lessonData[0].lesson.find(
-        (i) => i.id.toString() === this.activeId.toString()
+      if (!this.allLessons) return null
+      return this.allLessons.find(
+        (i) => i.id.toString() === this.$route.params.id
       )
     }
   },
@@ -181,75 +156,47 @@ export default {
   },
   mounted() {},
   methods: {
-    init() {
+    async init() {
       this.playInfo = undefined
       this.error = undefined
-      this.shouldWake = false
-      this.getTimer()
-      this.getData()
-    },
-    uniqueInit() {
-      this.playInfo = undefined
       this.unique = undefined
-      this.lessonData = undefined
-      this.getTimer()
-      this.getData()
+      this.shouldWake = false
+      if (this.socket_id) {
+        // this.getPlayInfo()
+      }
+
+      await this.getData()
     },
-    getTimer() {
-      this.timer && clearInterval(this.timer)
-      this.timer = setInterval(() => {
-        this.$store.dispatch("socket/log", {
-          name: "video_socket_id_check",
-          url: "",
-          data: ""
-        })
-      }, 5000)
-    },
+
     getPlayerStyle() {
       return `min-width: ${this.width}px; min-height: ${this.height}px; width: ${this.width}px; height: ${this.height}px;`
     },
     getLessonStyle() {
       return `min-height: ${this.height - 50}px;height: ${this.height - 50}px;`
     },
-    async toVideo(id) {
-      // lessonid
-      if (id !== this.activeId) {
-        // 点击不是当前视频，初始化vedio_time
-        this.vedio_time = 0
-
-        if (id.toString() !== this.$route.params.id) {
-          this.activeId = id
-          if (this.player) {
-            await this.player.dispose()
-          }
-
-          this.getPlayInfo()
-          this.lessonData[0].last_video = id // 更新本地数据当前小节视频id
-        }
+    toVideo(id) {
+      if (id.toString() !== this.$route.params.id) {
+        this.scrollTop = document.getElementsByClassName("related")[0].scrollTop
+        alert(this.scrollTop)
+        sessionStorage.setItem("scrollTop", this.scrollTop)
+        this.$router.push("/videos/watch/" + id)
       }
-    },
-    // async getData() {
-    //   this.data = await this.$api.video.LESSONS({
-    //     l_id: this.$route.params.id
-    //   })
-    // },
-    async updateStatus() {
-      await this.$api.video.COMPLETE({
-        play_id: this.play_id
-      })
     },
     async getData() {
       const msg = await this.$api.video.CLASSES()
-
-      this.lessonData = msg.filter(
-        (item) => item.id === Number(this.$route.params.id)
-      )
-
-      this.activeId = this.activeId || this.lessonData[0].last_video
-      if (this.activeId === 0) {
-        // 未看过视频，默认播放第一个视频
-        this.activeId = this.lessonData[0].lesson[0].id
-      }
+      msg.map((item) => {
+        item.lesson.map((les) => {
+          if (this.$route.params.id === les.id.toString()) {
+            this.data = item
+            this.$nextTick(() => {
+              this.scrollTop = sessionStorage.getItem("scrollTop")
+              document.getElementsByClassName(
+                "related"
+              )[0].scrollTop = this.scrollTop
+            })
+          }
+        })
+      })
       if (this.socket_id) {
         this.getPlayInfo()
       }
@@ -257,21 +204,16 @@ export default {
     async getPlayInfo() {
       const { code, msg } = await this.$api.video.PLAY({
         socket_id: this.$store.state.socket.id,
-        l_id: this.activeId
+        l_id: this.$route.params.id
       })
       if (code === "1000") {
         this.playInfo = msg.play_info[0]
         this.play_id = msg.play_id
+        this.getTimer()
         this.initPlayer()
       } else {
-        if (code !== "2006") {
-          this.playInfo = null
-          this.error = { code, msg }
-          this.init()
-        } else {
-          this.unique = false
-          this.playInfo = {}
-        }
+        this.playInfo = null
+        this.error = { code, msg }
       }
     },
     setKeys() {
@@ -339,12 +281,40 @@ export default {
         ? this.player.pause()
         : this.player.play()
     },
+    sendCheck() {
+      this.$store.dispatch("socket/log", {
+        name: "video_socket_id_check",
+        url: "",
+        data: this.play_id
+      })
+    },
+    getTimer() {
+      this.sendCheck(this.play_id)
+      this.timer && clearInterval(this.timer)
+      this.timer = setInterval(this.sendCheck, 5000)
+    },
+    checkSatatus(player) {
+      // 监听是否唯一设备
+      this.unique === undefined &&
+        this.$store.state.socket.client.on("video_socket_id_check", (data) => {
+          this.unique = data
+          if (this.unique === false) {
+            if (player) {
+              player.pause()
+            }
+          }
+        })
+    },
+    updateRecord(player) {
+      // 更新最近播放位置&发送视频进度
+      player.seek(this.lesson.last_position)
+      this.sendRecord()
+    },
     sendRecord() {
       // 每秒钟记录当前视频进度
-      clearInterval(this.sendRecordTimer)
+      this.sendRecordTimer && clearInterval(this.sendRecordTimer)
       this.sendRecordTimer = setInterval(() => {
-        this.vedio_time = this.vedio_time + 1
-
+        this.time++
         this.$store.dispatch("socket/log", {
           name: "video_record",
           url: "",
@@ -352,13 +322,13 @@ export default {
             course_id: this.lesson.pid, // 课程 ID
             lesson_id: this.lesson.id, // 小节 ID
             play_id: this.play_id, // 后端接口颁发的播放 ID
-            time: this.vedio_time, // 计时器当前秒数，从 0 开始
-            video_time: this.player.getCurrentTime() // 视频播放器当前秒数
+            time: this.time, // 计时器当前秒数，从 0 开始
+            video_time: parseInt(this.player.getCurrentTime()) // 视频播放器当前秒数
           }
         })
         //实时更新 last_position 字段
-        this.lessonData[0].lesson.map((item) => {
-          if (item.id.toString() === this.activeId.toString()) {
+        this.allLessons.map((item) => {
+          if (item.id.toString() === this.$route.params.id) {
             // 当前小节，更新数据
             item.last_position = this.player.getCurrentTime()
             if (JSON.parse(item.duration) - this.player.getCurrentTime() < 10) {
@@ -369,11 +339,17 @@ export default {
         })
       }, 1000)
     },
-    async initPlayer() {
+    async updateStatus() {
+      await this.$api.video.COMPLETE({
+        play_id: this.play_id
+      })
+    },
+    initPlayer() {
       const w = this.playInfo.width
       const h = this.playInfo.height
       this.width = (this.height * w) / h
       this.$refs.top.style.height = this.height + "px"
+      // if (this.player === null) {
       this.player = new Aliplayer(
         {
           id: "player",
@@ -383,44 +359,15 @@ export default {
           source: this.playInfo.PlayURL
         },
         (player) => {
-          player.on("timeupdate", (data) => {})
           player.on("play", () => {
-            let last_position = undefined
-            this.lessonData[0].lesson.map((item) => {
-              // console.log("item---", item.last_position)
-              if (item.id.toString() === this.activeId.toString()) {
-                // 当前小节，更新数据
-                last_position = parseInt(item.last_position)
-                last_position = item.last_position
-
-                last_position && player.seek(last_position)
-
-                this.shouldWake = true
-                setTimeout(() => {
-                  this.sendRecord() // 发送视频进度
-                }, 1000)
-              }
-            })
-            // console.log("当前播放位置11--", last_position)
-            // last_position && player.seek(last_position)
-            // this.shouldWake = true
-            // this.sendRecord() // 发送视频进度
-            this.$store.state.socket.client.on(
-              "video_socket_id_check",
-              (data) => {
-                this.unique = data
-                if (this.unique === false) {
-                  if (this.player) {
-                    player.pause()
-                  }
-                }
-              }
-            )
+            this.shouldWake = true
+            this.updateRecord(player)
+            this.checkSatatus(player)
           })
-
           player.on("pause", () => {
-            clearInterval(this.sendRecordTimer)
             this.shouldWake = false
+            // this.timer && clearInterval(this.timer)
+            // this.sendRecordTimer && clearInterval(this.sendRecordTimer)
             if (this.unique === false) {
               if (this.player) {
                 setTimeout(() => {
@@ -429,15 +376,13 @@ export default {
               }
             }
           })
-
           player.on("ended", () => {
-            console.log("结束")
             this.updateStatus()
-            this.vedio_time = 0
+            this.time = 0
             clearInterval(this.sendRecordTimer)
             //视频播放结束，更新 is_complete 字段
-            this.lessonData[0].lesson.map((item) => {
-              if (item.id.toString() === this.activeId.toString()) {
+            this.allLessons.map((item) => {
+              if (item.id.toString() === this.$route.params.id) {
                 // 当前小节，更新数据
                 item.is_complete = 1
                 item.last_position = 0
@@ -447,10 +392,13 @@ export default {
           })
         }
       )
+      // }
     }
   },
   destroyed() {
     this.timer && clearInterval(this.timer)
+    this.sendRecordTimer && clearInterval(this.sendRecordTimer)
+    // sessionStorage.setItem("scrollTop", 0)
   }
 }
 </script>
@@ -464,7 +412,6 @@ export default {
 <style lang="scss" scoped>
 @import url(https://g.alicdn.com/de/prismplayer/2.8.2/skins/default/aliplayer-min.css);
 @import "./style.scss";
-
 #video {
   -webkit-user-select: none;
   max-width: 1000px;
@@ -505,21 +452,25 @@ export default {
       overflow: hidden;
       white-space: nowrap;
       text-overflow: ellipsis;
+      span {
+        font-size: 12px;
+      }
     }
     .lesson-wrapper {
       display: flex;
       flex-wrap: wrap;
-      font-size: 12px;
       .lesson-item {
         display: flex;
         justify-content: space-between;
         color: #292929;
         background-color: #f2f2ff;
+        border: 2px solid #f2f2ff;
         width: 100%;
         margin-bottom: 10px;
         padding: 8px 10px;
         border-radius: 5px;
         cursor: pointer;
+        height: 38px;
         .sort {
           margin-right: 8px;
           color: #666;
@@ -586,17 +537,14 @@ export default {
     // }
   }
 }
-
 #player,
 #player-wrapper {
   overflow: hidden;
   position: relative;
   background: hsla(0, 0%, 15%, 1);
 }
-
 .info {
   transition: all 0.3s;
-
   h1 {
     margin: 0;
     padding: 0;
