@@ -56,10 +56,17 @@ export default {
     }
   },
   methods: {
-    toVideo(item) {
-      // const lesson = item.last_video
+    toVideo(data) {
+      let id
+      if (data.last_vedio !== 0) {
+        // 有播放视频
+        id = data.last_video
+      } else {
+        // 无播放视频
+        id = data.lesson[0].id
+      }
       this.$router.push({
-        path: "/videos/watch/" + item.id
+        path: "/videos/watch/" + id
       })
     },
     async getClasses() {
