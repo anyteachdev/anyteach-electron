@@ -8,11 +8,7 @@
       @play="player.play()"
     />
     <div class="top" ref="top">
-      <div
-        id="player-wrapper"
-        :style="getPlayerStyle()"
-        v-loading="playInfo === undefined"
-      >
+      <div id="player-wrapper" :style="getPlayerStyle()">
         <Error
           v-if="unique === false"
           @retry="init"
@@ -131,7 +127,7 @@ export default {
       this.shouldWake = false
       this.playInfo = undefined
       this.play_id = undefined
-      this.getPlayInfo()
+      // this.getPlayInfo()
       this.getData()
     }
   },
@@ -177,7 +173,6 @@ export default {
     toVideo(id) {
       if (id.toString() !== this.$route.params.id) {
         this.scrollTop = document.getElementsByClassName("related")[0].scrollTop
-        alert(this.scrollTop)
         sessionStorage.setItem("scrollTop", this.scrollTop)
         this.$router.push("/videos/watch/" + id)
       }
@@ -332,7 +327,10 @@ export default {
             // 当前小节，更新数据
             item.last_position = this.player.getCurrentTime()
             if (JSON.parse(item.duration) - this.player.getCurrentTime() < 10) {
-              this.updateStatus()
+              if (item.is_complete !== 1) {
+                this.updateStatus()
+                item.is_complete = 1
+              }
             }
           }
           return item
