@@ -4,6 +4,8 @@ import { createProtocol } from "vue-cli-plugin-electron-builder/lib"
 import { autoUpdater } from "electron-updater"
 import * as Sentry from "@sentry/electron"
 import { init } from "@sentry/electron/dist/main"
+import installExtension, { VUEJS_DEVTOOLS } from "electron-devtools-installer"
+
 
 init({
   dsn: "https://d1d884b0010346ba998205fc6d0f5f22@sentry.io/5177112"
@@ -16,7 +18,7 @@ const isMac = process.platform === "darwin"
 autoUpdater.logger = log
 autoUpdater.logger.transports.file.level = "info"
 
-process.on("uncaughtException", function(err) {
+process.on("uncaughtException", function (err) {
   Sentry.captureException(err)
 })
 
@@ -108,21 +110,21 @@ const template = [
   // { role: 'appMenu' }
   ...(isMac
     ? [
-        {
-          label: app.name,
-          submenu: [
-            { role: "about" },
-            { type: "separator" },
-            { role: "services" },
-            { type: "separator" },
-            { role: "hide" },
-            { role: "hideothers" },
-            { role: "unhide" },
-            { type: "separator" },
-            { role: "quit" }
-          ]
-        }
-      ]
+      {
+        label: app.name,
+        submenu: [
+          { role: "about" },
+          { type: "separator" },
+          { role: "services" },
+          { type: "separator" },
+          { role: "hide" },
+          { role: "hideothers" },
+          { role: "unhide" },
+          { type: "separator" },
+          { role: "quit" }
+        ]
+      }
+    ]
     : []),
   // { role: 'fileMenu' }
   {
@@ -135,13 +137,13 @@ const template = [
     submenu: isProduction
       ? [{ role: "togglefullscreen" }]
       : [
-          { role: "reload" },
-          { role: "forcereload" },
-          { role: "toggledevtools" },
-          { type: "separator" },
-          { type: "separator" },
-          { role: "togglefullscreen" }
-        ]
+        { role: "reload" },
+        { role: "forcereload" },
+        { role: "toggledevtools" },
+        { type: "separator" },
+        { type: "separator" },
+        { role: "togglefullscreen" }
+      ]
   },
   // { role: 'windowMenu' }
   {
@@ -151,11 +153,11 @@ const template = [
       { role: "zoom" },
       ...(isMac
         ? [
-            { type: "separator" },
-            { role: "front" },
-            { type: "separator" },
-            { role: "window" }
-          ]
+          { type: "separator" },
+          { role: "front" },
+          { type: "separator" },
+          { role: "window" }
+        ]
         : [{ role: "close" }])
     ]
   },
@@ -185,7 +187,8 @@ app.on("ready", async () => {
     // If you are not using Windows 10 dark mode, you may uncomment these lines
     // In addition, if the linked issue is closed, you can upgrade electron and uncomment these lines
     try {
-      await require("vue-cli-plugin-electron-builder/lib").installVueDevtools()
+      // await require("vue-cli-plugin-electron-builder/lib").installVueDevtools()
+      await installExtension(VUEJS_DEVTOOLS)
     } catch (e) {
       console.error("Vue Devtools failed to install:", e.toString())
     }
