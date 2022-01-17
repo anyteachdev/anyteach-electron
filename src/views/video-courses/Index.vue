@@ -32,6 +32,8 @@
           <!-- 进度条 -->
           <el-progress
             type="circle"
+            :width="18"
+            :stroke-width="2"
             :show-text="false"
             :percentage="item.perc * 100"
             status="exception"
@@ -44,7 +46,7 @@
 
 <script>
 import QR from "@/components/QR"
-import { ipcRenderer } from "electron"
+
 export default {
   name: "VideoCourses",
   components: {
@@ -78,39 +80,13 @@ export default {
         })
         item.perc = perc / item.lesson.length
       })
-      this.$nextTick(() => this.onResize())
     },
-    onResize() {
-      const items = [...document.getElementsByClassName("course-item")]
-      if (!items.length) return
-      this.$refs.item.forEach((i) => {
-        const totalWidth = this.$refs.wrapper.clientWidth
-        const width = totalWidth * 0.25 - 11.25
-        i.style.width = width + "px"
-      })
-      this.$refs.img.forEach((i) => {
-        const totalWidth = this.$refs.wrapper.clientWidth
-        const width = totalWidth * 0.25 - 11.25
-        const height = (width * 10) / 16
-        i.style.width = width + "px"
-        i.style.height = height + "px"
-      })
-    }
   },
   activated() {
     this.getClasses()
-    ipcRenderer.on("will-resize", (event, newBounds) => {
-      this.onResize()
-    })
   }
 }
 </script>
-<style>
-#video-courses .el-progress-circle {
-  width: 20px !important;
-  height: 20px !important;
-}
-</style>
 
 <style scoped lang="scss">
 @import "../../styles/common.scss";
@@ -126,8 +102,9 @@ export default {
   width: 100%;
   overflow: hidden;
   display: grid;
-  $columnWidth: calc(25% - 11.25px);
-  grid-template-columns: $columnWidth $columnWidth $columnWidth $columnWidth;
+  column-gap: 10px;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+
   justify-content: space-between;
 
   .course-item {
@@ -164,6 +141,7 @@ export default {
       overflow: hidden;
       margin-bottom: 5px;
       background-size: 100%;
+      padding-top: 62.5%;
     }
     .overlay {
       position: absolute;
@@ -172,8 +150,7 @@ export default {
       left: 0;
       width: 100%;
       height: 100%;
-      // background: rgba(1, 131, 255, 0.8);
-      background: rgba(237, 37, 78, 0.8);
+      background: rgba(237, 37, 78, 0.9);
       display: flex;
       align-items: center;
       justify-content: center;
