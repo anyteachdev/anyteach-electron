@@ -35,7 +35,7 @@
               @click="toVideo(lesson.id)"
               v-for="lesson in allLessons"
               :class="{
-                'lesson-item-active': lesson.id.toString() === $route.params.id
+                'lesson-item-active': lesson.id.toString() === $route.params.id,
               }"
               :key="lesson.id"
             >
@@ -47,7 +47,7 @@
               <i
                 v-if="
                   lesson.is_complete !== 1 &&
-                    lesson.id.toString() === $route.params.id
+                  lesson.id.toString() === $route.params.id
                 "
                 class="anyteachicon anyteach-zhengzaibofang"
               />
@@ -55,10 +55,12 @@
               <el-progress
                 v-if="
                   lesson.is_complete !== 1 &&
-                    lesson.id.toString() !== $route.params.id &&
-                    lesson.last_position.toString() !== '0'
+                  lesson.id.toString() !== $route.params.id &&
+                  lesson.last_position.toString() !== '0'
                 "
                 type="circle"
+                :width="18"
+                :stroke-width="2"
                 :show-text="false"
                 :percentage="
                   (Number(lesson.last_position) * 100) / Number(lesson.duration)
@@ -114,12 +116,12 @@ export default {
     }
   },
   watch: {
-    socket_id: function(val) {
+    socket_id: function (val) {
       if (val) {
         this.getPlayInfo()
       }
     },
-    $route: function(val) {
+    $route: function (val) {
       if (this.player) {
         this.player.dispose()
       }
@@ -150,7 +152,7 @@ export default {
     this.setKeys()
     this.init()
   },
-  mounted() {},
+  mounted() { },
   methods: {
     async init() {
       this.playInfo = undefined
@@ -202,7 +204,7 @@ export default {
         l_id: this.$route.params.id
       })
       if (code === "1000") {
-        this.playInfo = msg.play_info[0]
+        this.playInfo = msg.play_info[2]
         this.play_id = msg.play_id
         this.getTimer()
         this.initPlayer()
@@ -400,12 +402,6 @@ export default {
   }
 }
 </script>
-<style>
-#video .el-progress-circle {
-  width: 20px !important;
-  height: 20px !important;
-}
-</style>
 
 <style lang="scss" scoped>
 @import url(https://g.alicdn.com/de/prismplayer/2.8.2/skins/default/aliplayer-min.css);
