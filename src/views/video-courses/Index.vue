@@ -58,7 +58,7 @@ export default {
   methods: {
     toVideo(data) {
       let id
-      if (data.last_vedio !== 0) {
+      if (data.last_video !== 0) {
         // 有播放视频
         id = data.last_video
       } else {
