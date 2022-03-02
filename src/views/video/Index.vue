@@ -25,54 +25,52 @@
           />
         </div>
       </div>
-      <div class="related" v-if="data">
-        <div class="unit">
-          <!-- <h4 v-if="data.unit.length > 1">{{ unit.title }}</h4> -->
-          <div class="lesson-wrapper" :style="getLessonStyle()">
-            <div
-              tag="div"
-              class="lesson-item"
-              @click="toVideo(lesson.id)"
-              v-for="lesson in allLessons"
-              :class="{
-                'lesson-item-active': lesson.id.toString() === $route.params.id,
-              }"
-              :key="lesson.id"
-            >
-              <div class="ell">
-                <span class="sort">{{ lesson.sort || 0 }}</span>
-                <span>{{ lesson.title }}</span>
-              </div>
-
-              <i
-                v-if="
-                  lesson.is_complete !== 1 &&
-                  lesson.id.toString() === $route.params.id
-                "
-                class="anyteachicon anyteach-zhengzaibofang"
-              />
-              <!-- 进度条 -->
-              <el-progress
-                v-if="
-                  lesson.is_complete !== 1 &&
-                  lesson.id.toString() !== $route.params.id &&
-                  lesson.last_position.toString() !== '0'
-                "
-                type="circle"
-                :width="18"
-                :stroke-width="2"
-                :show-text="false"
-                :percentage="
-                  (Number(lesson.last_position) * 100) / Number(lesson.duration)
-                "
-                status="exception"
-              ></el-progress>
-              <!-- 已播放完成 -->
-              <i
-                class="anyteachicon anyteach-check"
-                v-if="lesson.is_complete === 1"
-              />
+      <div class="related" v-if="data" :style="getLessonStyle()">
+        <!-- <h4 v-if="data.unit.length > 1">{{ unit.title }}</h4> -->
+        <div class="lesson-wrapper">
+          <div
+            tag="div"
+            class="lesson-item"
+            @click="toVideo(lesson.id)"
+            v-for="lesson in allLessons"
+            :class="{
+              'lesson-item-active': lesson.id.toString() === $route.params.id,
+            }"
+            :key="lesson.id"
+          >
+            <div class="ell">
+              <span class="sort">{{ lesson.sort || 0 }}</span>
+              <span>{{ lesson.title }}</span>
             </div>
+
+            <i
+              v-if="
+                lesson.is_complete !== 1 &&
+                lesson.id.toString() === $route.params.id
+              "
+              class="anyteachicon anyteach-zhengzaibofang"
+            />
+            <!-- 进度条 -->
+            <el-progress
+              v-if="
+                lesson.is_complete !== 1 &&
+                lesson.id.toString() !== $route.params.id &&
+                lesson.last_position.toString() !== '0'
+              "
+              type="circle"
+              :width="18"
+              :stroke-width="2"
+              :show-text="false"
+              :percentage="
+                (Number(lesson.last_position) * 100) / Number(lesson.duration)
+              "
+              status="exception"
+            ></el-progress>
+            <!-- 已播放完成 -->
+            <i
+              class="anyteachicon anyteach-check"
+              v-if="lesson.is_complete === 1"
+            />
           </div>
         </div>
       </div>
@@ -170,7 +168,8 @@ export default {
       return `min-width: ${this.width}px; min-height: ${this.height}px; width: ${this.width}px; height: ${this.height}px;`
     },
     getLessonStyle() {
-      return `min-height: ${this.height - 50}px;height: ${this.height - 50}px;`
+      // return `min-height: ${this.height - 50}px;height: ${this.height - 50}px;`
+      return `height: ${this.height}px;`
     },
     toVideo(id) {
       if (id.toString() !== this.$route.params.id) {
@@ -438,9 +437,9 @@ export default {
     }
     .unit {
       margin-bottom: 10px;
-      &:last-of-type {
-        margin: 0;
-      }
+      // &:last-of-type {
+      //   margin: 0;
+      // }
     }
     .ell {
       overflow: hidden;
@@ -456,18 +455,22 @@ export default {
       .lesson-item {
         display: flex;
         justify-content: space-between;
-        color: #292929;
-        background-color: #f2f2ff;
-        border: 2px solid #f2f2ff;
+        border: 2px solid transparent;
+        color: white;
+        background: hsla(0, 0%, 20%, 1);
         width: 100%;
         margin-bottom: 10px;
         padding: 8px 10px;
         border-radius: 5px;
         cursor: pointer;
         height: 38px;
+        transition: all 0.2s;
+        &:last-of-type {
+          margin-bottom: 0;
+        }
         .sort {
           margin-right: 8px;
-          color: #666;
+          opacity: 0.4;
         }
         i {
           font-size: 12px;
