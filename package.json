@@ -4,7 +4,7 @@
   "description": "AnyTeach 的桌面端软件",
   "version": "1.0.0",
   "private": true,
-  "main": "background.js",
+  "main": "src/background.js",
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
@@ -18,7 +18,10 @@
     "e:build:win": "vue-cli-service electron:build --win",
     "e:build": "vue-cli-service electron:build --win --mac",
     "postinstall": "electron-builder install-app-deps",
-    "postuninstall": "electron-builder install-app-deps"
+    "postuninstall": "electron-builder install-app-deps",
+    "start": "electron-forge start",
+    "package": "electron-forge package",
+    "make": "electron-forge make"
   },
   "dependencies": {
     "@babel/compat-data": "^7.16.4",
@@ -28,6 +31,7 @@
     "chromedriver": "^96.0.0",
     "core-js": "^3.6.4",
     "electron-log": "^4.1.0",
+    "electron-squirrel-startup": "^1.0.0",
     "element-ui": "^2.13.0",
     "qrious": "^4.0.2",
     "socket.io-client": "^2.3.0",
@@ -36,6 +40,11 @@
     "vuex": "^3.1.2"
   },
   "devDependencies": {
+    "@electron-forge/cli": "^6.0.0-beta.65",
+    "@electron-forge/maker-deb": "^6.0.0-beta.65",
+    "@electron-forge/maker-rpm": "^6.0.0-beta.65",
+    "@electron-forge/maker-squirrel": "^6.0.0-beta.65",
+    "@electron-forge/maker-zip": "^6.0.0-beta.65",
     "@intlify/vue-i18n-loader": "^0.6.1",
     "@vue/cli-plugin-babel": "~4.2.0",
     "@vue/cli-plugin-eslint": "~4.2.0",
@@ -48,7 +57,6 @@
     "babel-eslint": "^10.0.3",
     "dotenv": "^8.2.0",
     "electron": "^13.6.3",
-    "electron-builder": "^22.2.0",
     "electron-devtools-installer": "^3.2.0",
     "electron-notarize": "^0.2.1",
     "electron-updater": "^4.2.5",
@@ -70,5 +78,8 @@
       "vue-cli-service lint",
       "git add"
     ]
+  },
+  "config": {
+    "forge": "./forge.config.js"
   }
 }
