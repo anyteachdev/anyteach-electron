@@ -1,6 +1,6 @@
 <template>
   <div id="watermark">
-    <div v-for="i in 10" :key="i" class="overlay">
+    <div v-for="i in 10" :key="i" class="watermark-overlay">
       <p v-for="j in 20" :key="j">
         {{ $store.state.user.name }}
         {{ $store.state.user.mobile || $store.state.user.user_id }}
@@ -23,12 +23,12 @@ export default {
   top: 0;
   width: 200%;
   overflow: hidden;
-  opacity: 0.2;
+  opacity: 0.2 !important;
   background: rgba(0, 0, 0, 0.1);
   pointer-events: none;
   -webkit-user-select: none;
 }
-.overlay {
+.watermark-overlay {
   transform: rotate(-25deg) translateY(-150px);
   overflow: visible;
   position: relative;

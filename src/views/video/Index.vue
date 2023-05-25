@@ -15,7 +15,6 @@
           title="您的账号已在别的设备登陆"
         />
         <div id="player" :style="getPlayerStyle()">
-          <Watermark v-if="player" />
           <Error
             v-if="error"
             @retry="init"
@@ -24,6 +23,7 @@
             :msg="error.msg"
           />
         </div>
+        <Watermark v-if="player" />
       </div>
       <div class="related" v-if="data" :style="getLessonStyle()">
         <!-- <h4 v-if="data.unit.length > 1">{{ unit.title }}</h4> -->
