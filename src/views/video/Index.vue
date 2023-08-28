@@ -77,7 +77,7 @@
     </div>
     <div class="info" v-if="data">
       <h2>
-        {{ data.title }}
+        {{ data.title }}—{{ data.end_time }}
       </h2>
       <h1>{{ lesson.title }}</h1>
       <p v-if="lesson.subtitle">{{ lesson.subtitle }}</p>
@@ -183,6 +183,10 @@ export default {
       msg.map((item) => {
         item.lesson.map((les) => {
           if (this.$route.params.id === les.id.toString()) {
+            if (item.end_time) {
+              const time = new Date(item.end_time)
+              item.end_time = time.getFullYear() + "-" + (time.getMonth() + 1) + "-" + time.getDate() + " 到期"
+            }
             this.data = item
             this.$nextTick(() => {
               this.scrollTop = sessionStorage.getItem("scrollTop")

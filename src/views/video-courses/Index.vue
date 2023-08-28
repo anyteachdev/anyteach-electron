@@ -28,6 +28,7 @@
           <h3>
             {{ item.lesson.length }}
             个视频
+            <span v-if="item.expire === 1" style="color: red;">30 天内到期</span>
           </h3>
           <!-- 进度条 -->
           <el-progress
