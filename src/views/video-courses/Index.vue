@@ -24,11 +24,11 @@
       </div>
     </div>
     <div v-else>
-      <div v-if="data.length > 10">
+      <div v-if="data.length > 10 || isSearch">
         <el-input v-model="searchKey" placeholder="请输入查询内容" style="width: 20%;"></el-input>
         <el-button type="primary" @click="search" style="margin-left: 10px;">查询</el-button>
       </div>
-      <el-divider v-if="data.length > 10"></el-divider>
+      <el-divider v-if="data.length > 10 || isSearch"></el-divider>
     
       <div class="courses" ref="wrapper">
         <div
