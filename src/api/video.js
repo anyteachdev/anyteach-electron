@@ -3,10 +3,15 @@ import axios from "axios"
 import { PHP_API } from "./config"
 
 export default {
-  CLASSES: async function() {
+  CLASSES: async function(params) {
     const url = PHP_API + "/video/courses/all"
     try {
-      const { data } = await axios(url)
+      const config = {
+        url,
+        method: "GET",
+        params
+      }
+      const { data } = await axios(config)
       const { code, msg } = data
       return code === "1000" ? msg : []
     } catch (err) {

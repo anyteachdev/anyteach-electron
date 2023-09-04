@@ -3,42 +3,63 @@
     id="video-courses"
     v-loading="data === undefined && $store.state.user.user_id"
   >
-    <div class="empty" v-if="data && !data.length">
+    <div class="empty" v-if="data && !data.length && !isSearch">
       <div>
         <h1>暂无视频课</h1>
         <p>去手机平台上逛逛吧</p>
         <QR url="http://wx.anyteach.cn" />
       </div>
     </div>
-    <div v-else class="courses" ref="wrapper">
-      <div
-        ref="item"
-        @click="toVideo(item)"
-        class="course-item"
-        v-for="(item, index) in data"
-        :key="index"
-      >
-        <div class="img" ref="img" :style="$bgd(item.img)">
-          <div class="overlay">
-            <i class="el-icon-video-play" />
-          </div>
+    <div v-else-if="data && !data.length && isSearch">
+      <div>
+        <el-input v-model="searchKey" placeholder="请输入查询内容" style="width: 20%;"></el-input>
+        <el-button type="primary" @click="search" style="margin-left: 10px;">查询</el-button>
+      </div>
+      <el-divider></el-divider>
+      <div class="empty">
+        <div>
+          <h1>暂无该视频课</h1>
+          <p>请重新输入查询条件</p>
         </div>
-        <h2>{{ item.title }}</h2>
-        <div class="c-footer">
-          <h3>
-            {{ item.lesson.length }}
-            个视频
-            <span v-if="item.expire === 1" style="color: red;">30 天内到期</span>
-          </h3>
-          <!-- 进度条 -->
-          <el-progress
-            type="circle"
-            :width="18"
-            :stroke-width="2"
-            :show-text="false"
-            :percentage="item.perc * 100"
-            status="exception"
-          ></el-progress>
+      </div>
+    </div>
+    <div v-else>
+      <div v-if="data.length > 10">
+        <el-input v-model="searchKey" placeholder="请输入查询内容" style="width: 20%;"></el-input>
+        <el-button type="primary" @click="search" style="margin-left: 10px;">查询</el-button>
+      </div>
+      <el-divider v-if="data.length > 10"></el-divider>
+    
+      <div class="courses" ref="wrapper">
+        <div
+          ref="item"
+          @click="toVideo(item)"
+          class="course-item"
+          v-for="(item, index) in data"
+          :key="index"
+        >
+          <div class="img" ref="img" :style="$bgd(item.img)">
+            <div class="overlay">
+              <i class="el-icon-video-play" />
+            </div>
+          </div>
+          <h2>{{ item.title }}</h2>
+          <div class="c-footer">
+            <h3>
+              {{ item.lesson.length }}
+              个视频
+              <span v-if="item.expire === 1" style="color: red;">30 天内到期</span>
+            </h3>
+            <!-- 进度条 -->
+            <el-progress
+              type="circle"
+              :width="18"
+              :stroke-width="2"
+              :show-text="false"
+              :percentage="item.perc * 100"
+              status="exception"
+            ></el-progress>
+          </div>
         </div>
       </div>
     </div>
@@ -55,7 +76,9 @@ export default {
   },
   data() {
     return {
-      data: undefined
+      data: undefined,
+      searchKey: undefined,
+      isSearch: false,
     }
   },
   methods: {
@@ -72,8 +95,9 @@ export default {
         path: "/videos/watch/" + id
       })
     },
-    async getClasses() {
-      this.data = await this.$api.video.CLASSES()
+    async getClasses(searchKey) {
+      let params = { searchKey }
+      this.data = await this.$api.video.CLASSES(params)
       this.data.map((item) => {
         let perc = 0
         item.lesson.map((lesson) => {
@@ -82,6 +106,10 @@ export default {
         item.perc = perc / item.lesson.length
       })
     },
+    search() {
+      this.getClasses(this.searchKey)
+      this.isSearch = true
+    }
   },
   activated() {
     this.getClasses()
