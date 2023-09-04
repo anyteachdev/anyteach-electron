@@ -112,6 +112,7 @@ export default {
     }
   },
   activated() {
+    this.searchKey = undefined
     this.getClasses()
   }
 }
